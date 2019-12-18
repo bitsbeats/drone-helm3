@@ -32,7 +32,7 @@ clusters:
       server: {{ .ApiServer }}
       {{- if eq .SkipTLS true }}
       insecure-skip-tls-verify: true
-      {{- else }}
+      {{- else if not (eq .Certificate "") }}
       certificate-authority-data: {{ .Certificate }}
       {{- end}}
 
@@ -103,9 +103,18 @@ func CreateKubeConfig(options ...Option) error {
 		return fmt.Errorf("no namespace provided")
 	}
 
-	file, err := os.Open(k.Config)
+	
+	file, err := os.Create(k.Config)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to write kubeconfig: %s", err)
 	}
-	return tmpl.Execute(file, k)
+	defer file.Close()
+	if err != nil {
+		return fmt.Errorf("unable to testwrite kubeconfig: %s", err)
+	}
+	err = tmpl.Lookup("kubeconfig").Execute(file, k)
+	if err != nil {
+		return fmt.Errorf("unable to render kubeconfig: %s", err)
+	}
+	return nil
 }

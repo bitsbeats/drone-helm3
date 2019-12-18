@@ -16,9 +16,16 @@ type (
 		Runner   Runner
 	}
 
-	HelmOption func(*HelmCmd)
-	Runner     func(ctx context.Context, command string, args ...string) error
+	HelmOption     func(*HelmCmd)
+	HelmModeOption func(*HelmCmd)
+	Runner         func(ctx context.Context, command string, args ...string) error
 )
+
+func WithInstallUpgradeMode() HelmModeOption {
+	return func(c *HelmCmd) {
+		c.Args = append([]string{"upgrade", "--install"}, c.Args...)
+	}
+}
 
 func WithRelease(release string) HelmOption {
 	return func(c *HelmCmd) {
@@ -89,7 +96,7 @@ func WithUpdateDependencies(update bool) HelmOption {
 	return func(c *HelmCmd) {
 		if update {
 			c.PreCmds = append(c.PreCmds, []string{
-				"helm", "dependeny", "update",
+				"helm", "dependency", "update",
 			})
 		}
 	}
@@ -109,14 +116,32 @@ func WithValuesYaml(file string) HelmOption {
 	}
 }
 
+func WithPreCommand(command ...string) HelmOption {
+	return func(c *HelmCmd) {
+		c.PreCmds = append(c.PreCmds, command)
+	}
+}
+
+func WithPostCommand(command ...string) HelmOption {
+	return func(c *HelmCmd) {
+		c.PostCmds = append(c.PostCmds, command)
+	}
+}
+
 func WithRunner(runner Runner) HelmOption {
 	return func(c *HelmCmd) {
 		c.Runner = runner
 	}
 }
 
-func NewHelmCmd(options ...HelmOption) (*HelmCmd, error) {
-	h := &HelmCmd{}
+func NewHelmCmd(mode HelmModeOption, options ...HelmOption) (*HelmCmd, error) {
+	h := &HelmCmd{
+		Args:     []string{},
+		PreCmds:  [][]string{},
+		PostCmds: [][]string{},
+		Runner:   nil,
+	}
+	mode(h)
 	for _, option := range options {
 		option(h)
 	}
@@ -127,8 +152,9 @@ func NewHelmCmd(options ...HelmOption) (*HelmCmd, error) {
 		return nil, fmt.Errorf("chart path is required")
 	}
 	if h.Runner == nil {
-		return nil, fmt.Errorf("unable to run without runner")
+		return nil, fmt.Errorf("runner is required")
 	}
+	h.Args = append(h.Args, h.Release, h.Chart)
 	return h, nil
 }
 
@@ -136,17 +162,17 @@ func (h *HelmCmd) Run(ctx context.Context) error {
 	for _, preCmd := range h.PreCmds {
 		err := h.Runner(ctx, preCmd[0], preCmd[1:]...)
 		if err != nil {
-			return err
+			return fmt.Errorf("precmd failed: %s", err)
 		}
 	}
 	err := h.Runner(ctx, "helm", h.Args...)
 	if err != nil {
-		return err
+		return fmt.Errorf("helm failed: %s", err)
 	}
 	for _, postCmd := range h.PostCmds {
 		err := h.Runner(ctx, postCmd[0], postCmd[1:]...)
 		if err != nil {
-			return err
+			return fmt.Errorf("postcmd failed: %s", err)
 		}
 	}
 	return nil

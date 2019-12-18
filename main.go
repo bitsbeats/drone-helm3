@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 	"log"
 	"os"
 	"os/exec"
 	"time"
-
-	"github.com/joho/godotenv"
-	"github.com/kelseyhightower/envconfig"
 
 	"github.com/bitsbeats/drone-helm3/internal/helm"
 	"github.com/bitsbeats/drone-helm3/internal/kube"
@@ -16,12 +15,14 @@ import (
 
 type (
 	Config struct {
-		KubeConfig      string `envconfig:"KUBE_CONFIG" required:"true"`
+		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`
+		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"`
 		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`
 		KubeToken       string `envconfig:"KUBERNETES_TOKEN" required:"true"`
 		KubeCertificate string `envconfig:"KUBERNETES_CERTIFICATE"`
 		KubeSkipTLS     bool   `envconfig:"KUBERNETES_SKIP_TLS" default:"false"`
 
+		Mode      string `envconfig:"MODE" default:"installupgrade"`
 		Chart     string `envconfig:"CHART" required:"true"`
 		Release   string `envconfig:"RELEASE" required:"true"`
 		Namespace string `envconfig:"NAMESPACE" required:"true"`
@@ -45,7 +46,11 @@ func main() {
 	// lookup env file if specified
 	envFile, ok := os.LookupEnv("PLUGIN_ENV_FILE")
 	if ok {
-		_ = godotenv.Load(envFile)
+		log.Printf("loading envfile %q", envFile)
+		err := godotenv.Load(envFile)
+		if err != nil {
+			log.Printf("unable to load environmnet from file: %s", err)
+		}
 	}
 
 	// load config from env
@@ -67,8 +72,18 @@ func main() {
 		log.Fatalf("unable to create kubernetes config: %s", err)
 	}
 
+	// configure helm operation mode
+	var modeOption helm.HelmModeOption
+	switch cfg.Mode {
+	case "installupgrade":
+		modeOption = helm.WithInstallUpgradeMode()
+	default:
+		log.Fatalf("mode %q is not known", cfg.Mode)
+	}
+
 	// create helm cmd
 	cmd, err := helm.NewHelmCmd(
+		modeOption,
 		helm.WithChart(cfg.Chart),
 		helm.WithRelease(cfg.Release),
 		helm.WithNamespace(cfg.Namespace),
@@ -91,6 +106,7 @@ func main() {
 	}
 
 	// run commands
+	log.Printf("running with a timeout of %s", cfg.Timeout.String())
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
 	defer cancel()
 	err = cmd.Run(ctx)
