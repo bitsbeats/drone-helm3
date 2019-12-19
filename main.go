@@ -20,9 +20,9 @@ type (
 		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`
 		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"`
 		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`
-		KubeToken       string `envconfig:"KUBERNETES_TOKEN" required:"true"`
-		KubeCertificate string `envconfig:"KUBERNETES_CERTIFICATE"`
-		KubeSkipTLS     bool   `envconfig:"KUBERNETES_SKIP_TLS" default:"false"`
+		KubeToken       string `envconfig:"KUBE_TOKEN" required:"true"`
+		KubeCertificate string `envconfig:"KUBE_CERTIFICATE"`
+		KubeSkipTLS     bool   `envconfig:"KUBE_SKIP_TLS" default:"false"`
 
 		Mode      string `envconfig:"MODE" default:"installupgrade"`
 		Chart     string `envconfig:"CHART" required:"true"`
