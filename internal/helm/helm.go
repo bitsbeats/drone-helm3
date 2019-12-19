@@ -25,7 +25,7 @@ type (
 
 func WithInstallUpgradeMode() HelmModeOption {
 	return func(c *HelmCmd) {
-		c.Args = append([]string{"upgrade", "--install", "-o", "table"}, c.Args...)
+		c.Args = append([]string{"upgrade", "--install"}, c.Args...)
 	}
 }
 
@@ -111,7 +111,7 @@ func WithHelmRepos(repos []string) HelmOption {
 		for _, repo := range repos {
 			split := strings.SplitN(repo, "=", 2)
 			if len(split) != 2 {
-				return fmt.Errorf("not in key=value format: %d", repo)
+				return fmt.Errorf("not in key=value format: %s", repo)
 			}
 			name := split[0]
 			url := split[1]
@@ -143,7 +143,7 @@ func WithValues(values []string) HelmOption {
 		for _, v := range values {
 			split := strings.SplitN(v, "=", 2)
 			if len(split) != 2 {
-				return fmt.Errorf("not in key=value format: %d", v)
+				return fmt.Errorf("not in key=value format: %s", v)
 			}
 			key := split[0]
 			value := split[1]
