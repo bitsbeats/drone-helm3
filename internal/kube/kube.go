@@ -109,9 +109,6 @@ func CreateKubeConfig(options ...Option) error {
 		return fmt.Errorf("unable to write kubeconfig: %s", err)
 	}
 	defer file.Close()
-	if err != nil {
-		return fmt.Errorf("unable to testwrite kubeconfig: %s", err)
-	}
 	err = tmpl.Lookup("kubeconfig").Execute(file, k)
 	if err != nil {
 		return fmt.Errorf("unable to render kubeconfig: %s", err)
