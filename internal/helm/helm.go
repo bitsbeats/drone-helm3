@@ -201,7 +201,10 @@ func NewHelmCmd(mode HelmModeOption, options ...HelmOption) (*HelmCmd, error) {
 	}
 	mode(h)
 	for _, option := range options {
-		option(h)
+		err := option(h)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse option: %s", err)
+		}
 	}
 	if h.Release == "" {
 		return nil, fmt.Errorf("release name is required")
