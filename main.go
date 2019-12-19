@@ -18,32 +18,32 @@ import (
 
 type (
 	Config struct {
-		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`
-		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"`
-		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`
-		KubeToken       string `envconfig:"KUBE_TOKEN" required:"true"`
-		KubeCertificate string `envconfig:"KUBE_CERTIFICATE"`
-		KubeSkipTLS     bool   `envconfig:"KUBE_SKIP_TLS" default:"false"`
+		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`                // skip creation of kubeconfig
+		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"` // path to kubeconfig
+		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`          // kubernetes api server
+		KubeToken       string `envconfig:"KUBE_TOKEN" required:"true"`               // kubernetes token
+		KubeCertificate string `envconfig:"KUBE_CERTIFICATE"`                         // kubernetes http ca
+		KubeSkipTLS     bool   `envconfig:"KUBE_SKIP_TLS" default:"false"`            // disable kubernetes tls verify
 
-		Mode      string `envconfig:"MODE" default:"installupgrade"`
-		Chart     string `envconfig:"CHART" required:"true"`
-		Release   string `envconfig:"RELEASE" required:"true"`
-		Namespace string `envconfig:"NAMESPACE" required:"true"`
+		Mode      string `envconfig:"MODE" default:"installupgrade"` // changes helm operation mode
+		Chart     string `envconfig:"CHART" required:"true"`         // the helm chart to be deployed
+		Release   string `envconfig:"RELEASE" required:"true"`       // helm release name
+		Namespace string `envconfig:"NAMESPACE" required:"true"`     // kubernets and helm namespace
 
-		Lint    bool `envconfig:"LINT" default:"true"`
-		Atomic  bool `envconfig:"ATOMIC" default:"true"`
-		Wait    bool `envconfig:"WAIT" default:"true"`
-		Force   bool `envconfig:"FORCE" default:"false"`
-		Cleanup bool `envconfig:"CLEANUP_ON_FAIL" default:"false"`
-		DryRun  bool `envconfig:"DRY_RUN" default:"false"`
+		Lint    bool `envconfig:"LINT" default:"true"`             // helm lint option
+		Atomic  bool `envconfig:"ATOMIC" default:"true"`           // helm atomic option
+		Wait    bool `envconfig:"WAIT" default:"true"`             // helm wait option
+		Force   bool `envconfig:"FORCE" default:"false"`           // helm force option
+		Cleanup bool `envconfig:"CLEANUP_ON_FAIL" default:"false"` // helm cleanup option
+		DryRun  bool `envconfig:"DRY_RUN" default:"false"`         // helm dryrun option
 
-		HelmRepos          []string `envconfig:"HELM_REPOS"`
-		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"`
+		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
+		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm update dependencies option
 
-		Values     []string `envconfig:"VALUES"`
-		ValuesYaml string   `envconfig:"VAULES_YAML"`
+		Values     []string `envconfig:"VALUES"`      // additional --set options
+		ValuesYaml string   `envconfig:"VAULES_YAML"` // additonal values files
 
-		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"`
+		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 	}
 )
 
