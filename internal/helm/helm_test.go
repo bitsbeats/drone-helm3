@@ -16,11 +16,11 @@ func TestHelmCmd(t *testing.T) {
 		return nil
 	}
 	tests := []struct {
-		mode         HelmModeOption
-		options      []HelmOption
-		want         string
-		createErr    error
-		runErr       error
+		mode      HelmModeOption
+		options   []HelmOption
+		want      string
+		createErr error
+		runErr    error
 	}{
 		{
 			mode: WithInstallUpgradeMode(),
@@ -39,7 +39,7 @@ func TestHelmCmd(t *testing.T) {
 				WithLint(true),
 				WithRunner(runner),
 			},
-			want: "helm lint\n" +
+			want: "helm lint chart\n" +
 				"helm upgrade --install foo chart\n",
 		},
 		{
@@ -68,8 +68,8 @@ func TestHelmCmd(t *testing.T) {
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
-				WithHelmRepos(map[string]string{
-					"dev": "https://example.com/dev-charts",
+				WithHelmRepos([]string{
+					"dev=https://example.com/dev-charts",
 				}),
 				WithRunner(runner),
 			},
@@ -86,8 +86,8 @@ func TestHelmCmd(t *testing.T) {
 				WithWait(true),
 				WithForce(true),
 				WithValuesYaml("./helm/values.yaml"),
-				WithValues(map[string]string{
-					"git.commit_sha": "21ffea3",
+				WithValues([]string{
+					"git.commit_sha=21ffea3",
 				}),
 				WithRunner(runner),
 			},
@@ -102,8 +102,8 @@ func TestHelmCmd(t *testing.T) {
 				WithChart("./helm/myapp"),
 				WithWait(true),
 				WithValuesYaml("./helm/values.yaml"),
-				WithValues(map[string]string{
-					"git.commit_sha": "21efea3",
+				WithValues([]string{
+					"git.commit_sha=21efea3",
 				}),
 				WithRunner(runner),
 			},
