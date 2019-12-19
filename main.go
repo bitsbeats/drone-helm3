@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -113,6 +114,15 @@ func main() {
 }
 
 func runner(ctx context.Context, name string, args ...string) error {
+	printArgs := make([]string, len(args))
+	for i := 1; i < len(args); i++ {
+		if args[i-1] == "--set-string" {
+			kv := strings.SplitN(args[i], "=", 2)
+			printArgs[i] = fmt.Sprintf("%s=***", kv[0])
+		}
+	}
+	log.Printf("running: %s %v", name, printArgs)
+
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
