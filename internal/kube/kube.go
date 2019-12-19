@@ -9,7 +9,7 @@ import (
 type (
 	kubeConfig struct {
 		Config      string
-		ApiServer        string
+		ApiServer   string
 		Token       string
 		Certificate string
 		SkipTLS     bool
@@ -103,7 +103,6 @@ func CreateKubeConfig(options ...Option) error {
 		return fmt.Errorf("no namespace provided")
 	}
 
-	
 	file, err := os.Create(k.Config)
 	if err != nil {
 		return fmt.Errorf("unable to write kubeconfig: %s", err)
