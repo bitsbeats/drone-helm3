@@ -14,9 +14,13 @@ ENV HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 ARG KUBECTL_VERSION=1.17.0
 ENV KUBECTL_URL=https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 
+WORKDIR /tmp
 RUN true \
-  && wget -O /usr/local/bin/helm "$HELM_URL" \
-  && wget -O /usr/local/bin/kubectl "$KUBECTL_URL"
+  && wget -O helm.tgz "$HELM_URL" \
+  && tar xvpf helm.tgz linux-amd64/helm \
+  && mv linux-amd64/helm /usr/local/bin/helm \
+  && wget -O /usr/local/bin/kubectl "$KUBECTL_URL" \
+  && chmod +x /usr/local/bin/kubectl
 
 # ---
 
