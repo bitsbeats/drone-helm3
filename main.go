@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/joho/godotenv"
-	"github.com/kelseyhightower/envconfig"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"time"
+
+	"github.com/joho/godotenv"
+	"github.com/kelseyhightower/envconfig"
 
 	"github.com/bitsbeats/drone-helm3/internal/helm"
 	"github.com/bitsbeats/drone-helm3/internal/kube"
