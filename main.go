@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -29,16 +30,18 @@ type (
 		Release   string `envconfig:"RELEASE" required:"true"`
 		Namespace string `envconfig:"NAMESPACE" required:"true"`
 
-		Lint   bool `envconfig:"LINT" default:"true"`
-		Wait   bool `envconfig:"WAIT" default:"true"`
-		Force  bool `envconfig:"FORCE" default:"false"`
-		DryRun bool `envconfig:"DRY_RUN" default:"false"`
+		Lint    bool `envconfig:"LINT" default:"true"`
+		Atomic  bool `envconfig:"ATOMIC" default:"true"`
+		Wait    bool `envconfig:"WAIT" default:"true"`
+		Force   bool `envconfig:"FORCE" default:"false"`
+		Cleanup bool `envconfig:"CLEANUP_ON_FAIL" default:"false"`
+		DryRun  bool `envconfig:"DRY_RUN" default:"false"`
 
-		HelmRepos          map[string]string `envconfig:"HELM_REPOS"`
-		UpdateDependencies bool              `envconfig:"UPDATE_DEPENDENCIES" default:"false"`
+		HelmRepos          []string `envconfig:"HELM_REPOS"`
+		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"`
 
-		Values     map[string]string `envconfig:"VALUES"`
-		ValuesYaml string            `envconfig:"VAULES_YAML"`
+		Values     []string `envconfig:"VALUES"`
+		ValuesYaml string   `envconfig:"VAULES_YAML"`
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"`
 	}
@@ -67,6 +70,7 @@ func main() {
 		kube.WithConfig(cfg.KubeConfig),
 		kube.WithApiServer(cfg.KubeApiServer),
 		kube.WithToken(cfg.KubeToken),
+		kube.WithNamespace(cfg.Namespace),
 		kube.WithCertificate(cfg.KubeCertificate),
 		kube.WithSkipTLS(cfg.KubeSkipTLS),
 	)
@@ -91,8 +95,10 @@ func main() {
 		helm.WithNamespace(cfg.Namespace),
 
 		helm.WithLint(cfg.Lint),
+		helm.WithAtomic(cfg.Atomic),
 		helm.WithWait(cfg.Wait),
 		helm.WithForce(cfg.Force),
+		helm.WithCleanupOnFail(cfg.Cleanup),
 		helm.WithDryRun(cfg.DryRun),
 
 		helm.WithHelmRepos(cfg.HelmRepos),
@@ -101,6 +107,7 @@ func main() {
 		helm.WithValues(cfg.Values),
 		helm.WithValuesYaml(cfg.ValuesYaml),
 
+		helm.WithKubeConfig(cfg.KubeConfig),
 		helm.WithRunner(runner),
 	)
 	if err != nil {
@@ -112,6 +119,9 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
 	defer cancel()
 	err = cmd.Run(ctx)
+	if err != nil {
+		log.Fatalf("error running helm: %s", err)
+	}
 }
 
 func runner(ctx context.Context, name string, args ...string) error {
@@ -127,5 +137,7 @@ func runner(ctx context.Context, name string, args ...string) error {
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	defer os.Stdout.Sync()
+	defer os.Stderr.Sync()
 	return cmd.Run()
 }

@@ -3,6 +3,8 @@ package helm
 import (
 	"context"
 	"fmt"
+	"log"
+	"strings"
 )
 
 type (
@@ -16,72 +18,104 @@ type (
 		Runner   Runner
 	}
 
-	HelmOption     func(*HelmCmd)
+	HelmOption     func(*HelmCmd) error
 	HelmModeOption func(*HelmCmd)
 	Runner         func(ctx context.Context, command string, args ...string) error
 )
 
 func WithInstallUpgradeMode() HelmModeOption {
 	return func(c *HelmCmd) {
-		c.Args = append([]string{"upgrade", "--install"}, c.Args...)
+		c.Args = append([]string{"upgrade", "--install", "-o", "table"}, c.Args...)
 	}
 }
 
 func WithRelease(release string) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		c.Release = release
+		return nil
 	}
 }
 
 func WithChart(chart string) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		c.Chart = chart
+		return nil
 	}
 }
 
 func WithNamespace(namespace string) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		c.Args = append(c.Args, "-n", namespace)
+		return nil
 	}
 }
 
 func WithLint(lint bool) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		if lint {
 			c.PreCmds = append(c.PreCmds, []string{
-				"helm", "lint",
+				"helm", "lint", c.Chart,
 			})
 		}
+		return nil
+	}
+}
+
+func WithAtomic(atomic bool) HelmOption {
+	return func(c *HelmCmd) error {
+		if atomic {
+			c.Args = append(c.Args, "--atomic")
+		}
+		return nil
 	}
 }
 
 func WithWait(wait bool) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		if wait {
 			c.Args = append(c.Args, "--wait")
 		}
+		return nil
 	}
 }
 
 func WithForce(force bool) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		if force {
 			c.Args = append(c.Args, "--force")
 		}
+		return nil
+	}
+}
+
+func WithCleanupOnFail(cleanup bool) HelmOption {
+	return func(c *HelmCmd) error {
+		if cleanup {
+			c.Args = append(c.Args, "--cleanup-on-fail")
+		}
+		return nil
 	}
 }
 
 func WithDryRun(dry bool) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		if dry {
 			c.Args = append(c.Args, "--dry-run")
 		}
+		return nil
 	}
 }
 
-func WithHelmRepos(repos map[string]string) HelmOption {
-	return func(c *HelmCmd) {
-		for name, url := range repos {
+func WithHelmRepos(repos []string) HelmOption {
+	return func(c *HelmCmd) error {
+		for _, repo := range repos {
+			split := strings.SplitN(repo, "=", 2)
+			if len(split) != 2 {
+				return fmt.Errorf("not in key=value format: %d", repo)
+			}
+			name := split[0]
+			url := split[1]
+			log.Printf("added repo: name:%q url:%q", name, url)
 			c.PreCmds = append(c.PreCmds, []string{
 				"helm", "repo", "add", name, url,
 			})
@@ -89,48 +123,72 @@ func WithHelmRepos(repos map[string]string) HelmOption {
 		c.PreCmds = append(c.PreCmds, []string{
 			"helm", "repo", "update",
 		})
+		return nil
 	}
 }
 
 func WithUpdateDependencies(update bool) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		if update {
 			c.PreCmds = append(c.PreCmds, []string{
 				"helm", "dependency", "update",
 			})
 		}
+		return nil
 	}
 }
 
-func WithValues(values map[string]string) HelmOption {
-	return func(c *HelmCmd) {
-		for key, value := range values {
+func WithValues(values []string) HelmOption {
+	return func(c *HelmCmd) error {
+		for _, v := range values {
+			split := strings.SplitN(v, "=", 2)
+			if len(split) != 2 {
+				return fmt.Errorf("not in key=value format: %d", v)
+			}
+			key := split[0]
+			value := split[1]
 			c.Args = append(c.Args, "--set-string", fmt.Sprintf("%s=%s", key, value))
 		}
+		return nil
 	}
 }
 
 func WithValuesYaml(file string) HelmOption {
-	return func(c *HelmCmd) {
-		c.Args = append(c.Args, "--values", file)
+	return func(c *HelmCmd) error {
+		if file != "" {
+			c.Args = append(c.Args, "--values", file)
+		}
+		return nil
 	}
 }
 
 func WithPreCommand(command ...string) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		c.PreCmds = append(c.PreCmds, command)
+		return nil
 	}
 }
 
 func WithPostCommand(command ...string) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		c.PostCmds = append(c.PostCmds, command)
+		return nil
+	}
+}
+
+func WithKubeConfig(config string) HelmOption {
+	return func(c *HelmCmd) error {
+		if config != "" {
+			c.Args = append(c.Args, "--kubeconfig", config)
+		}
+		return nil
 	}
 }
 
 func WithRunner(runner Runner) HelmOption {
-	return func(c *HelmCmd) {
+	return func(c *HelmCmd) error {
 		c.Runner = runner
+		return nil
 	}
 }
 
