@@ -126,6 +126,9 @@ func main() {
 
 func runner(ctx context.Context, name string, args ...string) error {
 	printArgs := make([]string, len(args))
+	if len(args) > 0 {
+		printArgs[0] = args[0]
+	}
 	for i := 1; i < len(args); i++ {
 		if args[i-1] == "--set-string" {
 			kv := strings.SplitN(args[i], "=", 2)
