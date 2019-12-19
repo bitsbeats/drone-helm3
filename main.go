@@ -66,16 +66,18 @@ func main() {
 	}
 
 	// create kube config
-	err = kube.CreateKubeConfig(
-		kube.WithConfig(cfg.KubeConfig),
-		kube.WithApiServer(cfg.KubeApiServer),
-		kube.WithToken(cfg.KubeToken),
-		kube.WithNamespace(cfg.Namespace),
-		kube.WithCertificate(cfg.KubeCertificate),
-		kube.WithSkipTLS(cfg.KubeSkipTLS),
-	)
-	if err != nil {
-		log.Fatalf("unable to create kubernetes config: %s", err)
+	if !cfg.KubeSkip {
+		err = kube.CreateKubeConfig(
+			kube.WithConfig(cfg.KubeConfig),
+			kube.WithApiServer(cfg.KubeApiServer),
+			kube.WithToken(cfg.KubeToken),
+			kube.WithNamespace(cfg.Namespace),
+			kube.WithCertificate(cfg.KubeCertificate),
+			kube.WithSkipTLS(cfg.KubeSkipTLS),
+		)
+		if err != nil {
+			log.Fatalf("unable to create kubernetes config: %s", err)
+		}
 	}
 
 	// configure helm operation mode
