@@ -57,10 +57,10 @@ func TestHelmCmd(t *testing.T) {
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
-				WithUpdateDependencies(true),
+				WithUpdateDependencies(true, "chart"),
 				WithRunner(runner),
 			},
-			want: "helm dependency update\n" +
+			want: "helm dependency update chart\n" +
 				"helm upgrade --install foo chart\n",
 		},
 		{

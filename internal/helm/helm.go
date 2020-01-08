@@ -127,11 +127,11 @@ func WithHelmRepos(repos []string) HelmOption {
 	}
 }
 
-func WithUpdateDependencies(update bool) HelmOption {
+func WithUpdateDependencies(update bool, chart string) HelmOption {
 	return func(c *HelmCmd) error {
 		if update {
 			c.PreCmds = append(c.PreCmds, []string{
-				"helm", "dependency", "update",
+				"helm", "dependency", "update", chart,
 			})
 		}
 		return nil

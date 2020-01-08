@@ -104,7 +104,7 @@ func main() {
 		helm.WithDryRun(cfg.DryRun),
 
 		helm.WithHelmRepos(cfg.HelmRepos),
-		helm.WithUpdateDependencies(cfg.UpdateDependencies),
+		helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
 
 		helm.WithValues(cfg.Values),
 		helm.WithValuesYaml(cfg.ValuesYaml),
