@@ -108,6 +108,9 @@ func WithDryRun(dry bool) HelmOption {
 
 func WithHelmRepos(repos []string) HelmOption {
 	return func(c *HelmCmd) error {
+		if len(repos) == 0 {
+			return nil
+		}
 		for _, repo := range repos {
 			split := strings.SplitN(repo, "=", 2)
 			if len(split) != 2 {
