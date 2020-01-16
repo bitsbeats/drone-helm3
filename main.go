@@ -43,7 +43,8 @@ type (
 		Values     []string `envconfig:"VALUES"`      // additional --set options
 		ValuesYaml string   `envconfig:"VAULES_YAML"` // additonal values files
 
-		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
+		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"`  // timeout for helm command
+		Debug   bool          `envconfig:"DEBUG", default:"false"` // debug configuration
 	}
 )
 
@@ -63,6 +64,17 @@ func main() {
 	err := envconfig.Process("PLUGIN", cfg)
 	if err != nil {
 		log.Fatalf("unable to parse environment: %s", err)
+	}
+
+	// debug
+	if cfg.Debug {
+		debugCfg := *cfg
+		debugCfg.KubeToken = "***"
+		for i, val := range debugCfg.Values {
+			kv := strings.SplitN(val, "=", 2)
+			debugCfg.Values[i] = fmt.Sprintf("%s=***", kv[0])
+		}
+		log.Printf("configuration: %+v", debugCfg)
 	}
 
 	// create kube config
