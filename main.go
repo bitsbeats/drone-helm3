@@ -108,6 +108,7 @@ func main() {
 		helm.WithRelease(cfg.Release),
 		helm.WithNamespace(cfg.Namespace),
 
+		helm.WithTimeout(cfg.Timeout),
 		helm.WithLint(cfg.Lint),
 		helm.WithAtomic(cfg.Atomic),
 		helm.WithWait(cfg.Wait),
@@ -130,7 +131,7 @@ func main() {
 
 	// run commands
 	log.Printf("running with a timeout of %s", cfg.Timeout.String())
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout + time.Minute)
 	defer cancel()
 	err = cmd.Run(ctx)
 	if err != nil {
