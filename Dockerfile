@@ -11,7 +11,7 @@ FROM alpine as downloader
 ARG HELM_VERSION=3.0.2
 ENV HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 
-ARG KUBECTL_VERSION=1.17.0
+ARG KUBECTL_VERSION=1.17.1
 ENV KUBECTL_URL=https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 
 WORKDIR /tmp
