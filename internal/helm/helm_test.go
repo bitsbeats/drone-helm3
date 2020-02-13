@@ -92,7 +92,7 @@ func TestHelmCmd(t *testing.T) {
 				WithRunner(runner),
 			},
 			want: "helm upgrade --install -n myapp-staging --wait --force --values ./helm/values.yaml " +
-				"--set-string git.commit_sha=21ffea3 myapp-staging ./helm/myapp\n",
+				"--set git.commit_sha=21ffea3 myapp-staging ./helm/myapp\n",
 		},
 		{
 			mode: WithInstallUpgradeMode(),
@@ -102,7 +102,7 @@ func TestHelmCmd(t *testing.T) {
 				WithChart("./helm/myapp"),
 				WithWait(true),
 				WithValuesYaml("./helm/values.yaml"),
-				WithValues([]string{
+				WithValuesString([]string{
 					"git.commit_sha=21efea3",
 				}),
 				WithRunner(runner),

@@ -158,6 +158,21 @@ func WithValues(values []string) HelmOption {
 			}
 			key := split[0]
 			value := split[1]
+			c.Args = append(c.Args, "--set", fmt.Sprintf("%s=%s", key, value))
+		}
+		return nil
+	}
+}
+
+func WithValuesString(values []string) HelmOption {
+	return func(c *HelmCmd) error {
+		for _, v := range values {
+			split := strings.SplitN(v, "=", 2)
+			if len(split) != 2 {
+				return fmt.Errorf("not in key=value format: %s", v)
+			}
+			key := split[0]
+			value := split[1]
 			c.Args = append(c.Args, "--set-string", fmt.Sprintf("%s=%s", key, value))
 		}
 		return nil

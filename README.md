@@ -35,6 +35,7 @@ Helm:
 * `HELM_REPOS`: additonal helm repos (**optional**)
 * `UPDATE_DEPENDENCIES`: helm update dependencies option (**optional**, **default**:`false`)
 * `VALUES`: additional --set options (**optional**)
+* `VALUES_STRING`: additional --set-string options (**optional**)
 * `VAULES_YAML`: additonal values files (**optional**)
 
 General:

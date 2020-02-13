@@ -40,8 +40,9 @@ type (
 		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
 		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm update dependencies option
 
-		Values     []string `envconfig:"VALUES"`      // additional --set options
-		ValuesYaml string   `envconfig:"VAULES_YAML"` // additonal values files
+		Values       []string `envconfig:"VALUES"`        // additional --set options
+		ValuesString []string `envconfig:"VALUES_STRING"` // additional --set-string options
+		ValuesYaml   string   `envconfig:"VAULES_YAML"`   // additonal values files
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
@@ -120,6 +121,7 @@ func main() {
 		helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
 
 		helm.WithValues(cfg.Values),
+		helm.WithValuesString(cfg.ValuesString),
 		helm.WithValuesYaml(cfg.ValuesYaml),
 
 		helm.WithKubeConfig(cfg.KubeConfig),
