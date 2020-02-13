@@ -43,7 +43,7 @@ type (
 		Values     []string `envconfig:"VALUES"`      // additional --set options
 		ValuesYaml string   `envconfig:"VAULES_YAML"` // additonal values files
 
-		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"`  // timeout for helm command
+		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
 	}
 )
@@ -131,7 +131,7 @@ func main() {
 
 	// run commands
 	log.Printf("running with a timeout of %s", cfg.Timeout.String())
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout + time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout+time.Minute)
 	defer cancel()
 	err = cmd.Run(ctx)
 	if err != nil {
