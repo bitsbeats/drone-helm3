@@ -44,7 +44,7 @@ type (
 		ValuesYaml string   `envconfig:"VAULES_YAML"` // additonal values files
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"`  // timeout for helm command
-		Debug   bool          `envconfig:"DEBUG", default:"false"` // debug configuration
+		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
 	}
 )
 
