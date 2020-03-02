@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.9
+
+- add optional envsubst support
+
 ## v0.1.8
 
 - fix debug copy command
