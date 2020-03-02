@@ -103,6 +103,8 @@ func main() {
 
 	// envsubst
 	if cfg.Envsubst {
+		log.Print("envsubst is enabled")
+		var err error
 		for i, val := range cfg.Values {
 			cfg.Values[i], err = envsubst.EvalEnv(val)
 			if err != nil {
