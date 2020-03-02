@@ -1,5 +1,10 @@
 # Changelog
 
+
+## v0.1.10
+
+- more debug options in envsubst
+
 ## v0.1.9
 
 - add optional envsubst support
