@@ -42,7 +42,7 @@ type (
 
 		Values       []string `envconfig:"VALUES"`        // additional --set options
 		ValuesString []string `envconfig:"VALUES_STRING"` // additional --set-string options
-		ValuesYaml   string   `envconfig:"VAULES_YAML"`   // additonal values files
+		ValuesYaml   string   `envconfig:"VALUES_YAML"`   // additonal values files
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
