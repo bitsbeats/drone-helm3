@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 
@@ -69,9 +70,14 @@ func main() {
 
 	// debug
 	if cfg.Debug {
-		debugCfg := *cfg
+		debugCfg := Config{}
+		copier.Copy(debugCfg, *cfg)
 		debugCfg.KubeToken = "***"
 		for i, val := range debugCfg.Values {
+			kv := strings.SplitN(val, "=", 2)
+			debugCfg.Values[i] = fmt.Sprintf("%s=***", kv[0])
+		}
+		for i, val := range debugCfg.ValuesString {
 			kv := strings.SplitN(val, "=", 2)
 			debugCfg.Values[i] = fmt.Sprintf("%s=***", kv[0])
 		}
@@ -145,7 +151,7 @@ func runner(ctx context.Context, name string, args ...string) error {
 	printArgs := make([]string, len(args))
 	copy(printArgs, args)
 	for i := 1; i < len(printArgs); i++ {
-		if printArgs[i-1] == "--set-string" {
+		if printArgs[i-1] == "--set-string" || printArgs[i-1] == "--set" {
 			kv := strings.SplitN(printArgs[i], "=", 2)
 			printArgs[i] = fmt.Sprintf("%s=***", kv[0])
 		}

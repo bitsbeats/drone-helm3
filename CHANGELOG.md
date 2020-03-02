@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.8
+
+- fix debug copy command
+
 ## v0.1.7
 
 - fix typo in environment variable VAULES_YAML => VALUES_YAML
