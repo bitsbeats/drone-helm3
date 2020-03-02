@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.11
+
+- update helm to v3.1.1
 
 ## v0.1.10
 
