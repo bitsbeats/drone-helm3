@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/drone/envsubst"
 	"github.com/jinzhu/copier"
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
@@ -41,9 +42,10 @@ type (
 		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
 		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm update dependencies option
 
-		Values       []string `envconfig:"VALUES"`        // additional --set options
-		ValuesString []string `envconfig:"VALUES_STRING"` // additional --set-string options
-		ValuesYaml   string   `envconfig:"VALUES_YAML"`   // additonal values files
+		Envsubst     bool     `envconfig:"ENVSUBST" default:"false"` // allow envsubst on Values und ValuesString
+		Values       []string `envconfig:"VALUES"`                   // additional --set options
+		ValuesString []string `envconfig:"VALUES_STRING"`            // additional --set-string options
+		ValuesYaml   string   `envconfig:"VALUES_YAML"`              // additonal values files
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
@@ -96,6 +98,22 @@ func main() {
 		)
 		if err != nil {
 			log.Fatalf("unable to create kubernetes config: %s", err)
+		}
+	}
+
+	// envsubst
+	if cfg.Envsubst {
+		for i, val := range cfg.Values {
+			cfg.Values[i], err = envsubst.EvalEnv(val)
+			if err != nil {
+				log.Fatalf("unable to envsubst %s: %s", val, err)
+			}
+		}
+		for i, val := range cfg.ValuesString {
+			cfg.ValuesString[i], err = envsubst.EvalEnv(val)
+			if err != nil {
+				log.Fatalf("unable to envsubst %s: %s", val, err)
+			}
 		}
 	}
 

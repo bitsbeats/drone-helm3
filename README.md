@@ -34,6 +34,7 @@ Helm:
 * `DRY_RUN`: helm dryrun option (**optional**, **default**:`false`)
 * `HELM_REPOS`: additonal helm repos (**optional**)
 * `UPDATE_DEPENDENCIES`: helm update dependencies option (**optional**, **default**:`false`)
+* `ENVSUBST`: allow envsubst on Values und ValuesString (**optional**, **default**:`false`)
 * `VALUES`: additional --set options (**optional**)
 * `VALUES_STRING`: additional --set-string options (**optional**)
 * `VALUES_YAML`: additonal values files (**optional**)
