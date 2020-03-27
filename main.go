@@ -40,7 +40,8 @@ type (
 		DryRun  bool `envconfig:"DRY_RUN" default:"false"`         // helm dryrun option
 
 		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
-		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm update dependencies option
+		BuildDependencies  bool     `encconfig:"BUILD_DEPENDENCIES" default:"true"`   // helm dependency build option
+		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm dependency update option
 
 		Envsubst     bool     `envconfig:"ENVSUBST" default:"false"` // allow envsubst on Values und ValuesString
 		Values       []string `envconfig:"VALUES"`                   // additional --set options
@@ -128,6 +129,12 @@ func main() {
 		log.Fatalf("mode %q is not known", cfg.Mode)
 	}
 
+	// helm validations
+	// no need to download old versions if we update
+	if cfg.UpdateDependencies {
+		cfg.BuildDependencies = false
+	}
+
 	// create helm cmd
 	cmd, err := helm.NewHelmCmd(
 		modeOption,
@@ -144,6 +151,7 @@ func main() {
 		helm.WithDryRun(cfg.DryRun),
 
 		helm.WithHelmRepos(cfg.HelmRepos),
+		helm.WithBuildDependencies(cfg.BuildDependencies, cfg.Chart),
 		helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
 
 		helm.WithValues(cfg.Values),

@@ -57,6 +57,17 @@ func TestHelmCmd(t *testing.T) {
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
+				WithBuildDependencies(true, "chart"),
+				WithRunner(runner),
+			},
+			want: "helm dependency build chart\n" +
+				"helm upgrade --install foo chart\n",
+		},
+		{
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithRelease("foo"),
+				WithChart("chart"),
 				WithUpdateDependencies(true, "chart"),
 				WithRunner(runner),
 			},

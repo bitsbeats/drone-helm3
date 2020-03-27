@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.13
+
+- add build dependencies option
+- build dependencies is default enabled, disabled if `UPDATE_DEPENDENCIES` is set
+
 ## v0.1.12
 
 - update helm to v3.1.2

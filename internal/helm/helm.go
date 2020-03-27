@@ -138,6 +138,17 @@ func WithHelmRepos(repos []string) HelmOption {
 	}
 }
 
+func WithBuildDependencies(build bool, chart string) HelmOption {
+	return func(c *HelmCmd) error {
+		if build {
+			c.PreCmds = append(c.PreCmds, []string{
+				"helm", "dependency", "build", chart,
+			})
+		}
+		return nil
+	}
+}
+
 func WithUpdateDependencies(update bool, chart string) HelmOption {
 	return func(c *HelmCmd) error {
 		if update {
