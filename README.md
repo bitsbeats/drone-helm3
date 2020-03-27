@@ -11,6 +11,27 @@ Kubectl Version: 1.17.2
 
 ## Drone settings
 
+Example:
+
+```yaml
+- name: deploy app
+  image: bitsbeats/drone-helm3
+  settings:
+    kube_api_server: kube.example.com
+    kube_token: { from_secret: kube_token }
+
+    chart: ./path-to/chart
+    release: release-name
+    namespace: namespace-name
+    timeout: 20m
+    helm_repos:
+      - bitnami=https://charts.bitnami.com/bitnami
+    envsubst: true
+    values:
+      - app.environment=awesome
+	  - app.tag=${DRONE_TAG/v/}
+```
+
 Kubernetes:
 
 * `KUBE_SKIP`: skip creation of kubeconfig (**optional**, **default**:`false`)
