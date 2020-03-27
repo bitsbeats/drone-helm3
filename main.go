@@ -74,7 +74,7 @@ func main() {
 	// debug
 	if cfg.Debug {
 		debugCfg := Config{}
-		copier.Copy(debugCfg, *cfg)
+		_ = copier.Copy(debugCfg, *cfg)
 		debugCfg.KubeToken = "***"
 		for i, val := range debugCfg.Values {
 			kv := strings.SplitN(val, "=", 2)
