@@ -29,8 +29,11 @@ Example:
     envsubst: true
     values:
       - app.environment=awesome
-	  - app.tag=${DRONE_TAG/v/}
+      - app.tag=${DRONE_TAG/v/}
+      - app.commit=${DRONE_COMMIT_SHA}
 ```
+
+**Note**: If you enable envsubst make sure to surrount your variables like `${variable}`, `$variable` will *not* work.
 
 Kubernetes:
 
