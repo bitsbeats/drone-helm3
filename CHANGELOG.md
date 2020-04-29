@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.14
+
+- update helm to v3.1.3
+
 ## v0.1.13
 
 - add build dependencies option
