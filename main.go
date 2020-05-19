@@ -40,7 +40,7 @@ type (
 		DryRun  bool `envconfig:"DRY_RUN" default:"false"`         // helm dryrun option
 
 		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
-		BuildDependencies  bool     `encconfig:"BUILD_DEPENDENCIES" default:"true"`   // helm dependency build option
+		BuildDependencies  bool     `envconfig:"BUILD_DEPENDENCIES" default:"true"`   // helm dependency build option
 		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm dependency update option
 
 		Envsubst     bool     `envconfig:"ENVSUBST" default:"false"` // allow envsubst on Values und ValuesString
