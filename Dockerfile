@@ -8,7 +8,7 @@ RUN GOOS=linux go build -mod=vendor -ldflags="-s -w"
 
 FROM alpine as downloader
 
-ARG HELM_VERSION=3.1.3
+ARG HELM_VERSION=3.2.1
 ENV HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 
 ARG KUBECTL_VERSION=1.17.2

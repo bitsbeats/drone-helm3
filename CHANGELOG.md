@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.1.17
+
+- update helm to v3.2.1
+
+## v0.1.16
+
+- fix typo on build_dependencies
+
+## v0.1.15
+
+- fix debug output
+
 ## v0.1.14
 
 - update helm to v3.1.3
