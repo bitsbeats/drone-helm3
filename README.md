@@ -35,35 +35,37 @@ Example:
 
 **Note**: If you enable envsubst make sure to surrount your variables like `${variable}`, `$variable` will *not* work.
 
+Following settings are availible as Drones `settings:`:
+
 Kubernetes:
 
-* `KUBE_SKIP`: skip creation of kubeconfig (**optional**, **default**:`false`)
-* `KUBE_CONFIG`: path to kubeconfig (**optional**, **default**:`/root/.kube/config`)
-* `KUBE_API_SERVER`: kubernetes api server (**required**)
-* `KUBE_TOKEN`: kubernetes token (**required**)
-* `KUBE_CERTIFICATE`: kubernetes http ca (**optional**)
-* `KUBE_SKIP_TLS`: disable kubernetes tls verify (**optional**, **default**:`false`)
+* `kube_skip`: skip creation of kubeconfig (**optional**, **default**:`false`)
+* `kube_config`: path to kubeconfig (**optional**, **default**:`/root/.kube/config`)
+* `kube_api_server`: kubernetes api server (**required**)
+* `kube_token`: kubernetes token (**required**)
+* `kube_certificate`: kubernetes http ca (**optional**)
+* `kube_skip_tls`: disable kubernetes tls verify (**optional**, **default**:`false`)
 
 Helm:
 
-* `MODE`: changes helm operation mode (**optional**, **default**:`installupgrade`)
-* `CHART`: the helm chart to be deployed (**required**)
-* `RELEASE`: helm release name (**required**)
-* `NAMESPACE`: kubernets and helm namespace (**required**)
-* `LINT`: helm lint option (**optional**, **default**:`true`)
-* `ATOMIC`: helm atomic option (**optional**, **default**:`true`)
-* `WAIT`: helm wait option (**optional**, **default**:`true`)
-* `FORCE`: helm force option (**optional**, **default**:`false`)
-* `CLEANUP_ON_FAIL`: helm cleanup option (**optional**, **default**:`false`)
-* `DRY_RUN`: helm dryrun option (**optional**, **default**:`false`)
-* `HELM_REPOS`: additonal helm repos (**optional**)
-* `BUILD_DEPENDENCIES`: helm dependency build option (**optional**, **default**:`true`)
-* `UPDATE_DEPENDENCIES`: helm dependency update option (**optional**, **default**:`false`, **disables** `BUILD_DEPENDENCIES`)
-* `ENVSUBST`: allow envsubst on Values und ValuesString (**optional**, **default**:`false`)
-* `VALUES`: additional --set options (**optional**)
-* `VALUES_STRING`: additional --set-string options (**optional**)
-* `VALUES_YAML`: additonal values files (**optional**)
+* `mode`: changes helm operation mode (**optional**, **default**:`installupgrade`)
+* `chart`: the helm chart to be deployed (**required**)
+* `release`: helm release name (**required**)
+* `namespace`: kubernets and helm namespace (**required**)
+* `lint`: helm lint option (**optional**, **default**:`true`)
+* `atomic`: helm atomic option (**optional**, **default**:`true`)
+* `wait`: helm wait option (**optional**, **default**:`true`)
+* `force`: helm force option (**optional**, **default**:`false`)
+* `cleanup_on_fail`: helm cleanup option (**optional**, **default**:`false`)
+* `dry_run`: helm dryrun option (**optional**, **default**:`false`)
+* `helm_repos`: additonal helm repos (**optional**)
+* `build_dependencies`: helm dependency build option (**optional**, **default**:`true`)
+* `update_dependencies`: helm dependency update option (**optional**, **default**:`false`, **disables** `BUILD_DEPENDENCIES`)
+* `envsubst`: allow envsubst on Values und ValuesString (**optional**, **default**:`false`)
+* `values`: additional --set options (**optional**)
+* `values_string`: additional --set-string options (**optional**)
+* `values_yaml`: additonal values files (**optional**)
 
 General:
 
-* `TIMEOUT`: timeout for helm command (**optional**, **default**:`15m`)
+* `timeout`: timeout for helm command (**optional**, **default**:`15m`)
