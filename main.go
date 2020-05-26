@@ -42,6 +42,8 @@ type (
 		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
 		BuildDependencies  bool     `envconfig:"BUILD_DEPENDENCIES" default:"true"`   // helm dependency build option
 		UpdateDependencies bool     `envconfig:"UPDATE_DEPENDENCIES" default:"false"` // helm dependency update option
+		Test               bool     `envconfig:"TEST" default:"false"`                // helm run tests
+		TestRollback       bool     `envconfig:"TEST_ROLLBACK" default:"false"`       // helm run tests and rollback on failure
 
 		Envsubst     bool     `envconfig:"ENVSUBST" default:"false"` // allow envsubst on Values und ValuesString
 		Values       []string `envconfig:"VALUES"`                   // additional --set options
@@ -134,6 +136,10 @@ func main() {
 	if cfg.UpdateDependencies {
 		cfg.BuildDependencies = false
 	}
+	// test rollback requires test
+	if cfg.TestRollback {
+		cfg.Test = true
+	}
 
 	// create helm cmd
 	cmd, err := helm.NewHelmCmd(
@@ -153,13 +159,15 @@ func main() {
 		helm.WithHelmRepos(cfg.HelmRepos),
 		helm.WithBuildDependencies(cfg.BuildDependencies, cfg.Chart),
 		helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
+		helm.WithTest(cfg.Test, cfg.Release),
+		helm.WithTestRollback(cfg.Test, cfg.Release),
 
 		helm.WithValues(cfg.Values),
 		helm.WithValuesString(cfg.ValuesString),
 		helm.WithValuesYaml(cfg.ValuesYaml),
 
 		helm.WithKubeConfig(cfg.KubeConfig),
-		helm.WithRunner(runner),
+		helm.WithRunner(NewRunner()),
 	)
 	if err != nil {
 		log.Fatalf("unable to generate helm command: %s", err)
@@ -175,7 +183,13 @@ func main() {
 	}
 }
 
-func runner(ctx context.Context, name string, args ...string) error {
+type Runner struct{}
+
+func NewRunner() *Runner {
+	return &Runner{}
+}
+
+func (r *Runner) Run(ctx context.Context, name string, args ...string) error {
 	printArgs := make([]string, len(args))
 	copy(printArgs, args)
 	for i := 1; i < len(printArgs); i++ {

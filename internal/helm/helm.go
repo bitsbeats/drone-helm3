@@ -17,11 +17,16 @@ type (
 		PreCmds  [][]string
 		PostCmds [][]string
 		Runner   Runner
+
+		Test         bool
+		TestRollback bool
 	}
 
 	HelmOption     func(*HelmCmd) error
 	HelmModeOption func(*HelmCmd)
-	Runner         func(ctx context.Context, command string, args ...string) error
+	Runner         interface {
+		Run(ctx context.Context, command string, args ...string) error
+	}
 )
 
 func WithInstallUpgradeMode() HelmModeOption {
@@ -160,6 +165,20 @@ func WithUpdateDependencies(update bool, chart string) HelmOption {
 	}
 }
 
+func WithTest(test bool, release string) HelmOption {
+	return func(c *HelmCmd) error {
+		c.Test = test
+		return nil
+	}
+}
+
+func WithTestRollback(test bool, release string) HelmOption {
+	return func(c *HelmCmd) error {
+		c.TestRollback = test
+		return nil
+	}
+}
+
 func WithValues(values []string) HelmOption {
 	return func(c *HelmCmd) error {
 		for _, v := range values {
@@ -258,17 +277,33 @@ func NewHelmCmd(mode HelmModeOption, options ...HelmOption) (*HelmCmd, error) {
 
 func (h *HelmCmd) Run(ctx context.Context) error {
 	for _, preCmd := range h.PreCmds {
-		err := h.Runner(ctx, preCmd[0], preCmd[1:]...)
+		err := h.Runner.Run(ctx, preCmd[0], preCmd[1:]...)
 		if err != nil {
 			return fmt.Errorf("precmd failed: %s", err)
 		}
 	}
-	err := h.Runner(ctx, "helm", h.Args...)
+	err := h.Runner.Run(ctx, "helm", h.Args...)
 	if err != nil {
 		return fmt.Errorf("helm failed: %s", err)
 	}
+	if h.Test {
+		err := h.Runner.Run(ctx, "helm", "test", "--logs", h.Release)
+		if err != nil {
+			log.Printf("TEST FAILED: %s", err)
+			if h.TestRollback {
+				rollbackErr := h.Runner.Run(ctx, "helm", "rollback", h.Release)
+				if rollbackErr != nil {
+					log.Printf("ROLLBACK FAILED: %s", err)
+					return rollbackErr
+				} else {
+					log.Printf("TEST FAILED: %s", err)
+				}
+			}
+			return err
+		}
+	}
 	for _, postCmd := range h.PostCmds {
-		err := h.Runner(ctx, postCmd[0], postCmd[1:]...)
+		err := h.Runner.Run(ctx, postCmd[0], postCmd[1:]...)
 		if err != nil {
 			return fmt.Errorf("postcmd failed: %s", err)
 		}
