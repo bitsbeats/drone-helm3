@@ -1,80 +1,121 @@
 package helm
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"strings"
 	"testing"
+
+	"github.com/bitsbeats/drone-helm3/mock"
+	"github.com/golang/mock/gomock"
 )
 
 func TestHelmCmd(t *testing.T) {
-	var w io.Writer
-	runner := func(ctx context.Context, cmd string, args ...string) error {
-		fmt.Fprintf(w, "%s %s\n", cmd, strings.Join(args, " "))
-		return nil
-	}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockRunner := mock.NewMockRunner(ctrl)
+
 	tests := []struct {
+		name      string
 		mode      HelmModeOption
 		options   []HelmOption
-		want      string
+		setup     func()
 		createErr error
 		runErr    error
 	}{
 		{
+			name: "helm upgrade",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm upgrade --install foo chart\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "foo", "chart",
+				)
+			},
 		},
 		{
+			name: "helm upgrade with lint",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
 				WithLint(true),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm lint chart\n" +
-				"helm upgrade --install foo chart\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "lint", "chart",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "foo", "chart",
+				)
+
+			},
 		},
 		{
+			name: "helm upgrade as dry run",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
 				WithDryRun(true),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm upgrade --install --dry-run foo chart\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "--dry-run", "foo", "chart",
+				)
+			},
 		},
 		{
+			name: "helm upgrade with dependency build",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
 				WithBuildDependencies(true, "chart"),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm dependency build chart\n" +
-				"helm upgrade --install foo chart\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "dependency", "build", "chart",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "foo", "chart",
+				)
+			},
 		},
 		{
+			name: "helm upgrade with dependency update",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("foo"),
 				WithChart("chart"),
 				WithUpdateDependencies(true, "chart"),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm dependency update chart\n" +
-				"helm upgrade --install foo chart\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "dependency", "update", "chart",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "foo", "chart",
+				)
+			},
 		},
 		{
+			name: "helm upgrade with repos",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("foo"),
@@ -82,13 +123,25 @@ func TestHelmCmd(t *testing.T) {
 				WithHelmRepos([]string{
 					"dev=https://example.com/dev-charts",
 				}),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm repo add dev https://example.com/dev-charts\n" +
-				"helm repo update\n" +
-				"helm upgrade --install foo chart\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "repo", "add", "dev", "https://example.com/dev-charts",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "repo", "update",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "foo", "chart",
+				)
+			},
 		},
 		{
+			name: "helm upgrade with force, wait, vaules and values yaml",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithNamespace("myapp-staging"),
@@ -100,12 +153,20 @@ func TestHelmCmd(t *testing.T) {
 				WithValues([]string{
 					"git.commit_sha=21ffea3",
 				}),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm upgrade --install -n myapp-staging --wait --force --values ./helm/values.yaml " +
-				"--set git.commit_sha=21ffea3 myapp-staging ./helm/myapp\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-staging",
+					"--wait", "--force", "--values", "./helm/values.yaml",
+					"--set", "git.commit_sha=21ffea3",
+					"myapp-staging", "./helm/myapp",
+				)
+			},
 		},
 		{
+			name: "helm upgrade with wait, values yaml and values string",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithNamespace("myapp-production"),
@@ -116,12 +177,20 @@ func TestHelmCmd(t *testing.T) {
 				WithValuesString([]string{
 					"git.commit_sha=21efea3",
 				}),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
-			want: "helm upgrade --install -n myapp-production --wait --values ./helm/values.yaml " +
-				"--set-string git.commit_sha=21efea3 myapp-production ./helm/myapp\n",
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"--wait", "--values", "./helm/values.yaml",
+					"--set-string", "git.commit_sha=21efea3",
+					"myapp-production", "./helm/myapp",
+				)
+			},
 		},
 		{
+			name: "with missing runner",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("myapp"),
@@ -130,87 +199,200 @@ func TestHelmCmd(t *testing.T) {
 			createErr: fmt.Errorf("runner is required"),
 		},
 		{
+			name: "with missing chart",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithRelease("myapp"),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
 			createErr: fmt.Errorf("chart path is required"),
 		},
 		{
+			name: "with missing release name",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithChart("./helm/myapp"),
-				WithRunner(runner),
+				WithRunner(mockRunner),
 			},
 			createErr: fmt.Errorf("release name is required"),
 		},
 		{
+			name: "with failed precmd",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithNamespace("myapp-production"),
 				WithRelease("myapp-production"),
 				WithChart("./helm/myapp"),
 				WithPreCommand("prefail"),
-				WithRunner(func(ctx context.Context, name string, args ...string) error {
-					if name == "prefail" {
-						return fmt.Errorf("prefail")
-					}
-					return nil
-				}),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"prefail",
+				).Return(fmt.Errorf("prefail"))
 			},
 			runErr: fmt.Errorf("precmd failed: prefail"),
 		},
 		{
+			name: "with failed helm upgrade",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithNamespace("myapp-production"),
 				WithRelease("myapp-production"),
 				WithChart("./helm/myapp"),
-				WithRunner(func(ctx context.Context, name string, args ...string) error {
-					if name == "helm" {
-						return fmt.Errorf("runfail")
-					}
-					return nil
-				}),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"myapp-production", "./helm/myapp",
+				).Return(fmt.Errorf("runfail"))
 			},
 			runErr: fmt.Errorf("helm failed: runfail"),
 		},
 		{
+			name: "with failed postcmd",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
 				WithNamespace("myapp-production"),
 				WithRelease("myapp-production"),
 				WithChart("./helm/myapp"),
 				WithPostCommand("postfail"),
-				WithRunner(func(ctx context.Context, name string, args ...string) error {
-					if name == "postfail" {
-						return fmt.Errorf("postfail")
-					}
-					return nil
-				}),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"myapp-production", "./helm/myapp",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"postfail",
+				).Return(fmt.Errorf("postfail"))
 			},
 			runErr: fmt.Errorf("postcmd failed: postfail"),
 		},
+		{
+			name: "with helm test",
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-production"),
+				WithRelease("myapp-production"),
+				WithChart("./helm/myapp"),
+				WithTest(true, "myapp-release"),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"myapp-production", "./helm/myapp",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "test", "--logs", "myapp-production",
+				)
+			},
+			runErr: nil,
+		},
+		{
+			name: "with failed helm test",
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-production"),
+				WithRelease("myapp-production"),
+				WithChart("./helm/myapp"),
+				WithTest(true, "myapp-release"),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"myapp-production", "./helm/myapp",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "test", "--logs", "myapp-production",
+				).Return(fmt.Errorf("testfail"))
+			},
+			runErr: fmt.Errorf("testfail"),
+		},
+		{
+			name: "with failed test and sucessfull rollback",
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-production"),
+				WithRelease("myapp-production"),
+				WithChart("./helm/myapp"),
+				WithTest(true, "myapp-release"),
+				WithTestRollback(true, "myapp-release"),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"myapp-production", "./helm/myapp",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "test", "--logs", "myapp-production",
+				).Return(fmt.Errorf("testfail"))
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "rollback", "myapp-production",
+				)
+			},
+			runErr: fmt.Errorf("testfail"),
+		},
+		{
+			name: "with failed test and failed rollback",
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-production"),
+				WithRelease("myapp-production"),
+				WithChart("./helm/myapp"),
+				WithTest(true, "myapp-release"),
+				WithTestRollback(true, "myapp-release"),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-production",
+					"myapp-production", "./helm/myapp",
+				)
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "test", "--logs", "myapp-production",
+				).Return(fmt.Errorf("testfail"))
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "rollback", "myapp-production",
+				).Return(fmt.Errorf("rollbackfail"))
+			},
+			runErr: fmt.Errorf("rollbackfail"),
+		},
 	}
 
-	for _, test := range tests {
-		w = bytes.NewBuffer([]byte{})
+	for i, test := range tests {
+		t.Logf("running #%d: %s", i, test.name)
 		cmd, err := NewHelmCmd(test.mode, test.options...)
 		if !errEq(err, test.createErr) {
 			t.Fatalf("unable to create helm cmd:\n- %v\n+ %v", test.createErr, err)
 		} else if err != nil {
 			continue
 		}
+		test.setup()
 		err = cmd.Run(context.Background())
 		if !errEq(err, test.runErr) {
 			t.Fatalf("unable to run helm cmd:\n- %v\n+ %v", test.runErr, err)
 		} else if err != nil {
 			continue
-		}
-		got := w.(*bytes.Buffer).String()
-		if test.want != got {
-			t.Fatalf("mismatch:\n- %s\n+ %s", test.want, got)
 		}
 	}
 }

@@ -61,6 +61,8 @@ Helm:
 * `helm_repos`: additonal helm repos (**optional**)
 * `build_dependencies`: helm dependency build option (**optional**, **default**:`true`)
 * `update_dependencies`: helm dependency update option (**optional**, **default**:`false`, **disables** `BUILD_DEPENDENCIES`)
+* `test`: run helm tests after the helm upgrade (**optional**, **default**: `false`)
+* `test_rollback`: run helm tests and rollback if the tests fail (**optional**, **default**: `false`)
 * `envsubst`: allow envsubst on Values und ValuesString (**optional**, **default**:`false`)
 * `values`: additional --set options (**optional**)
 * `values_string`: additional --set-string options (**optional**)
