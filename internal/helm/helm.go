@@ -118,6 +118,15 @@ func WithDryRun(dry bool) HelmOption {
 	}
 }
 
+func WithDebug(dry bool) HelmOption {
+	return func(c *HelmCmd) error {
+		if dry {
+			c.Args = append(c.Args, "--debug")
+		}
+		return nil
+	}
+}
+
 func WithTimeout(timeout time.Duration) HelmOption {
 	return func(c *HelmCmd) error {
 		c.Args = append(c.Args, "--timeout", timeout.String())
