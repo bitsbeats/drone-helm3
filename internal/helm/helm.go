@@ -20,6 +20,12 @@ type (
 
 		Test         bool
 		TestRollback bool
+
+		OnSuccess                   []func()
+		OnTestSuccess               []func()
+		OnTestFailed                []func()
+		OnTestFailedRollbackSuccess []func()
+		OnTestFailedRollbackFailed  []func()
 	}
 
 	HelmOption     func(*HelmCmd) error

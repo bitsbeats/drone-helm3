@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.18
+
+- update helm to v3.3.1
+- update kubectl to 1.19.0
+
 ## v0.1.17
 
 - update helm to v3.2.1
