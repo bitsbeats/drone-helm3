@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.19
+
+- add helm_debug option
+- suppress helm stdout to prevent secret leakage
+
 ## v0.1.18
 
 - update helm to v3.3.1

@@ -58,6 +58,7 @@ Helm:
 * `force`: helm force option (**optional**, **default**:`false`)
 * `cleanup_on_fail`: helm cleanup option (**optional**, **default**:`false`)
 * `dry_run`: helm dryrun option (**optional**, **default**:`false`)
+* `helm_debug`: helm debug option (**optional**, **default**:`true`)
 * `helm_repos`: additonal helm repos (**optional**)
 * `build_dependencies`: helm dependency build option (**optional**, **default**:`true`)
 * `update_dependencies`: helm dependency update option (**optional**, **default**:`false`, **disables** `BUILD_DEPENDENCIES`)
