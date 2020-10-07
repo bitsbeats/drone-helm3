@@ -311,18 +311,18 @@ func (h *HelmCmd) Run(ctx context.Context) error {
 				rollbackErr := h.Runner.Run(ctx, "helm", "rollback", h.Release)
 				if rollbackErr != nil {
 					log.Printf("ROLLBACK FAILED: %s", rollbackErr)
-					return Wrap(rollbackErr, "rollback failed", core.RollbackFailedErrorKind)
+					return Wrap(rollbackErr, "release and rollback failed", core.RollbackFailedErrorKind)
 				} else {
 					log.Printf("TEST FAILED: %s", err)
 				}
 			}
-			return Wrap(err, "release failed and rollback successfull", core.RollbackSuccessErrorKind)
+			return Wrap(err, "release failed and rollback successful", core.RollbackSuccessErrorKind)
 		}
 	}
 	for _, postCmd := range h.PostCmds {
 		err := h.Runner.Run(ctx, postCmd[0], postCmd[1:]...)
 		if err != nil {
-			return Wrap(err, "post cmd failed", core.PostFailErrorKind)
+			return Wrap(err, "postcmd failed", core.PostFailErrorKind)
 		}
 	}
 	return nil

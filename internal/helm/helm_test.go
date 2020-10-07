@@ -319,7 +319,7 @@ func TestHelmCmd(t *testing.T) {
 					"helm", "test", "--logs", "myapp-production",
 				).Return(fmt.Errorf("testfail"))
 			},
-			runErr: fmt.Errorf("testfail"),
+			runErr: fmt.Errorf("release failed and rollback successful: testfail"),
 		},
 		{
 			name: "with failed test and sucessfull rollback",
@@ -347,7 +347,7 @@ func TestHelmCmd(t *testing.T) {
 					"helm", "rollback", "myapp-production",
 				)
 			},
-			runErr: fmt.Errorf("testfail"),
+			runErr: fmt.Errorf("release failed and rollback successful: testfail"),
 		},
 		{
 			name: "with failed test and failed rollback",
@@ -375,7 +375,7 @@ func TestHelmCmd(t *testing.T) {
 					"helm", "rollback", "myapp-production",
 				).Return(fmt.Errorf("rollbackfail"))
 			},
-			runErr: fmt.Errorf("rollbackfail"),
+			runErr: fmt.Errorf("release and rollback failed: rollbackfail"),
 		},
 	}
 
