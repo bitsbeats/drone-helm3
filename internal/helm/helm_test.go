@@ -391,8 +391,6 @@ func TestHelmCmd(t *testing.T) {
 		err = cmd.Run(context.Background())
 		if !errEq(err, test.runErr) {
 			t.Fatalf("unable to run helm cmd:\n- %v\n+ %v", test.runErr, err)
-		} else if err != nil {
-			continue
 		}
 	}
 }
