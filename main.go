@@ -79,6 +79,7 @@ func main() {
 
 	var eh errorhandler.Handler
 	if cfg.PushGatewayURL != "" {
+		log.Printf("pushgateway is %s", cfg.PushGatewayURL)
 		eh = errorhandler.NewPushgateway(cfg.Release, cfg.PushGatewayURL)
 	} else {
 		eh = errorhandler.NewLog()
