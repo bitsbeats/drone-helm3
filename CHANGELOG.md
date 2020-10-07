@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.20
+
+- add support for Prometheus Pushgateway metrics
+
 ## v0.1.19
 
 - add helm_debug option

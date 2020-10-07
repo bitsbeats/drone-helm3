@@ -33,9 +33,12 @@ Example:
       - app.commit=${DRONE_COMMIT_SHA}
 ```
 
-**Note**: If you enable envsubst make sure to surrount your variables like `${variable}`, `$variable` will *not* work.
+**Note**: If you enable envsubst make sure to surrount your variables like
+`${variable}`, `$variable` will *not* work.
 
-Following settings are availible as Drones `settings:`:
+Following settings are availible as Drones `settings:`, a full list can be
+viewed on the `Config` `struct`
+[here](https://github.com/bitsbeats/drone-helm3/blob/master/main.go#L22).
 
 Kubernetes:
 

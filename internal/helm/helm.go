@@ -6,6 +6,8 @@ import (
 	"log"
 	"strings"
 	"time"
+
+	"github.com/bitsbeats/drone-helm3/internal/core"
 )
 
 type (
@@ -294,12 +296,12 @@ func (h *HelmCmd) Run(ctx context.Context) error {
 	for _, preCmd := range h.PreCmds {
 		err := h.Runner.Run(ctx, preCmd[0], preCmd[1:]...)
 		if err != nil {
-			return fmt.Errorf("precmd failed: %s", err)
+			return Wrap(err, "precmd failed", core.PreFailErrorKind)
 		}
 	}
 	err := h.Runner.Run(ctx, "helm", h.Args...)
 	if err != nil {
-		return fmt.Errorf("helm failed: %s", err)
+		return Wrap(err, "helm failed", core.FailedErrorKind)
 	}
 	if h.Test {
 		err := h.Runner.Run(ctx, "helm", "test", "--logs", h.Release)
@@ -308,20 +310,40 @@ func (h *HelmCmd) Run(ctx context.Context) error {
 			if h.TestRollback {
 				rollbackErr := h.Runner.Run(ctx, "helm", "rollback", h.Release)
 				if rollbackErr != nil {
-					log.Printf("ROLLBACK FAILED: %s", err)
-					return rollbackErr
+					log.Printf("ROLLBACK FAILED: %s", rollbackErr)
+					return Wrap(rollbackErr, "rollback failed", core.RollbackFailedErrorKind)
 				} else {
 					log.Printf("TEST FAILED: %s", err)
 				}
 			}
-			return err
+			return Wrap(err, "release failed and rollback successfull", core.RollbackSuccessErrorKind)
 		}
 	}
 	for _, postCmd := range h.PostCmds {
 		err := h.Runner.Run(ctx, postCmd[0], postCmd[1:]...)
 		if err != nil {
-			return fmt.Errorf("postcmd failed: %s", err)
+			return Wrap(err, "post cmd failed", core.PostFailErrorKind)
 		}
 	}
 	return nil
+}
+
+type (
+	HelmError struct {
+		Context string
+		Kind    core.ErrorKind
+		Err     error
+	}
+)
+
+func (e *HelmError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Context, e.Err)
+}
+
+func Wrap(err error, info string, kind core.ErrorKind) *HelmError {
+	return &HelmError{
+		Context: info,
+		Kind:    kind,
+		Err:     err,
+	}
 }

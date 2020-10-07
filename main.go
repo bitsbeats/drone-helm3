@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 
+	"github.com/bitsbeats/drone-helm3/internal/errorhandler"
 	"github.com/bitsbeats/drone-helm3/internal/helm"
 	"github.com/bitsbeats/drone-helm3/internal/kube"
 )
@@ -26,6 +27,8 @@ type (
 		KubeToken       string `envconfig:"KUBE_TOKEN" required:"true"`               // kubernetes token
 		KubeCertificate string `envconfig:"KUBE_CERTIFICATE"`                         // kubernetes http ca
 		KubeSkipTLS     bool   `envconfig:"KUBE_SKIP_TLS" default:"false"`            // disable kubernetes tls verify
+
+		PushGatewayURL string `envconfig:"PUSHGATEWAY_URL" default:""` // url to a prometheus pushgateway server
 
 		Mode      string `envconfig:"MODE" default:"installupgrade"` // changes helm operation mode
 		Chart     string `envconfig:"CHART" required:"true"`         // the helm chart to be deployed
@@ -74,6 +77,8 @@ func main() {
 		log.Fatalf("unable to parse environment: %s", err)
 	}
 
+	eh := errorhandler.NewPushgateway(cfg.Release, cfg.PushGatewayURL)
+
 	// debug
 	if cfg.Debug {
 		debugCfg := Config{}
@@ -101,7 +106,7 @@ func main() {
 			kube.WithSkipTLS(cfg.KubeSkipTLS),
 		)
 		if err != nil {
-			log.Fatalf("unable to create kubernetes config: %s", err)
+			eh.Fatalf("unable to create kubernetes config: %s", err)
 		}
 	}
 
@@ -112,13 +117,13 @@ func main() {
 		for i, val := range cfg.Values {
 			cfg.Values[i], err = envsubst.EvalEnv(val)
 			if err != nil {
-				log.Fatalf("unable to envsubst %s: %s", val, err)
+				eh.Fatalf("unable to envsubst %s: %s", val, err)
 			}
 		}
 		for i, val := range cfg.ValuesString {
 			cfg.ValuesString[i], err = envsubst.EvalEnv(val)
 			if err != nil {
-				log.Fatalf("unable to envsubst %s: %s", val, err)
+				eh.Fatalf("unable to envsubst %s: %s", val, err)
 			}
 		}
 	}
@@ -129,7 +134,7 @@ func main() {
 	case "installupgrade":
 		modeOption = helm.WithInstallUpgradeMode()
 	default:
-		log.Fatalf("mode %q is not known", cfg.Mode)
+		eh.Fatalf("mode %q is not known", cfg.Mode)
 	}
 
 	// helm validations
@@ -172,7 +177,7 @@ func main() {
 		helm.WithRunner(NewRunner()),
 	)
 	if err != nil {
-		log.Fatalf("unable to generate helm command: %s", err)
+		eh.Fatalf("unable to generate helm command: %s", err)
 	}
 
 	// run commands
@@ -181,7 +186,7 @@ func main() {
 	defer cancel()
 	err = cmd.Run(ctx)
 	if err != nil {
-		log.Fatalf("error running helm: %s", err)
+		eh.Fatalf("error running helm: %s", err)
 	}
 }
 
