@@ -77,7 +77,12 @@ func main() {
 		log.Fatalf("unable to parse environment: %s", err)
 	}
 
-	eh := errorhandler.NewPushgateway(cfg.Release, cfg.PushGatewayURL)
+	var eh errorhandler.Handler
+	if cfg.PushGatewayURL != "" {
+		eh = errorhandler.NewPushgateway(cfg.Release, cfg.PushGatewayURL)
+	} else {
+		eh = errorhandler.NewLog()
+	}
 
 	// debug
 	if cfg.Debug {

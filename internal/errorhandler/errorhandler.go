@@ -68,6 +68,10 @@ func (e *Pushgateway) Status(status error, message string, v ...interface{}) {
 //       into a more specific implementation
 type Log struct{}
 
+func NewLog() *Log {
+	return &Log{}
+}
+
 func (e *Log) Fatalf(message string, v ...interface{}) {
 	log.Fatalf(message, v...)
 }
