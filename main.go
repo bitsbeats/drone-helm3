@@ -193,6 +193,7 @@ func main() {
 	if err != nil {
 		eh.Fatalf("error running helm: %s", err)
 	}
+	eh.Status(err, "finished deployment successfully")
 }
 
 type Runner struct{}
