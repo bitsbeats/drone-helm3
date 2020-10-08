@@ -56,6 +56,9 @@ type (
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
+
+		// auto-filled by drone
+		DroneRepo string `envconfig:"DRONE_REPO" required:"true"`
 	}
 )
 
@@ -80,7 +83,7 @@ func main() {
 	var eh errorhandler.Handler
 	if cfg.PushGatewayURL != "" {
 		log.Printf("pushgateway is %s", cfg.PushGatewayURL)
-		eh = errorhandler.NewPushgateway(cfg.Release, cfg.PushGatewayURL)
+		eh = errorhandler.NewPushgateway(cfg.DroneRepo, cfg.Namespace, cfg.Release, cfg.PushGatewayURL)
 	} else {
 		eh = errorhandler.NewLog()
 	}
