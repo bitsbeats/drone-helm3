@@ -58,7 +58,7 @@ func (e *Pushgateway) Status(status error, message string, v ...interface{}) {
 		msg = "undefined"
 	}
 
-	buffer := bytes.NewBuffer([]byte("# TYPE drone_helm3_build_status gauge"))
+	buffer := bytes.NewBuffer([]byte("# TYPE drone_helm3_build_status gauge\n"))
 	_, _ = fmt.Fprintf(buffer, "drone_helm3_build_status{status=%q} %d\n", msg, time.Now().Unix())
 	url := fmt.Sprintf(
 		"%s/job/drone_helm3/repo@base64/%s/namespace@base64/%s/release@base64/%s",
