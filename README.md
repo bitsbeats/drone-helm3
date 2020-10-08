@@ -36,42 +36,42 @@ Example:
 **Note**: If you enable envsubst make sure to surrount your variables like
 `${variable}`, `$variable` will *not* work.
 
-Following settings are availible as Drones `settings:`, a full list can be
-viewed on the `Config` `struct`
-[here](https://github.com/bitsbeats/drone-helm3/blob/master/main.go#L22).
+An always up2date version of the availible config options can be viewed on the
+source on the `Config` `struct` [here][1].
 
-Kubernetes:
+## Monitoring
 
-* `kube_skip`: skip creation of kubeconfig (**optional**, **default**:`false`)
-* `kube_config`: path to kubeconfig (**optional**, **default**:`/root/.kube/config`)
-* `kube_api_server`: kubernetes api server (**required**)
-* `kube_token`: kubernetes token (**required**)
-* `kube_certificate`: kubernetes http ca (**optional**)
-* `kube_skip_tls`: disable kubernetes tls verify (**optional**, **default**:`false`)
+Its possible to monitor your builds and rollbacks using prometheus and
+prometheus-pushgateway. To enable specify the `pushgateway_url` setting.
 
-Helm:
+Example alertrule:
 
-* `mode`: changes helm operation mode (**optional**, **default**:`installupgrade`)
-* `chart`: the helm chart to be deployed (**required**)
-* `release`: helm release name (**required**)
-* `namespace`: kubernets and helm namespace (**required**)
-* `lint`: helm lint option (**optional**, **default**:`true`)
-* `atomic`: helm atomic option (**optional**, **default**:`true`)
-* `wait`: helm wait option (**optional**, **default**:`true`)
-* `force`: helm force option (**optional**, **default**:`false`)
-* `cleanup_on_fail`: helm cleanup option (**optional**, **default**:`false`)
-* `dry_run`: helm dryrun option (**optional**, **default**:`false`)
-* `helm_debug`: helm debug option (**optional**, **default**:`true`)
-* `helm_repos`: additonal helm repos (**optional**)
-* `build_dependencies`: helm dependency build option (**optional**, **default**:`true`)
-* `update_dependencies`: helm dependency update option (**optional**, **default**:`false`, **disables** `BUILD_DEPENDENCIES`)
-* `test`: run helm tests after the helm upgrade (**optional**, **default**: `false`)
-* `test_rollback`: run helm tests and rollback if the tests fail (**optional**, **default**: `false`)
-* `envsubst`: allow envsubst on Values und ValuesString (**optional**, **default**:`false`)
-* `values`: additional --set options (**optional**)
-* `values_string`: additional --set-string options (**optional**)
-* `values_yaml`: additonal values files (**optional**)
+```
+          - alert: Helm3RolloutFailed
+            expr: |
+              drone_helm3_build_status{status!="success"}
+            labels:
+              severity: critical
+            annotations:
+              summary: >-
+                Helm3 was unable to deploy {{ $labels.repo }} as
+                {{ $labels.release }} into namespace {{ $labels.namespace }}
+              action: >-
+                Validate the `deploy` step of the last drone ci run for this
+                repository. Either the build has *failed entirely* or the
+                `helm test` did fail. For more information on tests see
+                https://github.com/bitsbeats/drone-helm3/#monitoring
+```
 
-General:
+## Helm Tests
 
-* `timeout`: timeout for helm command (**optional**, **default**:`15m`)
+Helm tests are special Pods that have the `"helm.sh/hook": test` annotation set.
+If the command in the docker container returns an exitcode > 0 the drone step
+will be marked as failed. See the [Helm documentation][2].
+
+In addition you can set the `test_rollback` setting to run `helm rollback` if
+the tests fail.
+
+
+[1]: https://github.com/bitsbeats/drone-helm3/blob/master/main.go#L22
+[2]: https://helm.sh/docs/topics/chart_tests/
