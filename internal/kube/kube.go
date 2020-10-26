@@ -103,7 +103,7 @@ func CreateKubeConfig(options ...Option) error {
 		return fmt.Errorf("no namespace provided")
 	}
 
-	file, err := os.Create(k.Config)
+	file, err := os.OpenFile(k.Config, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
 		return fmt.Errorf("unable to write kubeconfig: %s", err)
 	}
