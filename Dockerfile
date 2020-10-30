@@ -14,8 +14,8 @@ ENV HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 ARG KUBECTL_VERSION=1.19.2
 ENV KUBECTL_URL=https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 
-ARG AWS_IAM_AUTHENTICATOR_VERION=1.18.8/2020-09-18
-ENV AWS_IAM_AUTHENTICATOR_URL=https://amazon-eks.s3.us-west-2.amazonaws.com/${AWS_IAM_AUTHENTICATOR_VERION}/bin/linux/amd64/aws-iam-authenticator
+ARG AWS_IAM_AUTHENTICATOR_VERSION=1.18.8/2020-09-18
+ENV AWS_IAM_AUTHENTICATOR_URL=https://amazon-eks.s3.us-west-2.amazonaws.com/${AWS_IAM_AUTHENTICATOR_VERSION}/bin/linux/amd64/aws-iam-authenticator
 
 WORKDIR /tmp
 RUN true \
