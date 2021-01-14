@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.21
+
+- update helm to v3.5.0
+- update kubectl to v1.19.7
+
 ## v0.1.20
 
 - add support for Prometheus Pushgateway metrics
