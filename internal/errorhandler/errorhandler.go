@@ -2,6 +2,7 @@ package errorhandler
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -67,7 +68,16 @@ func (e *Pushgateway) Status(status error, message string, v ...interface{}) {
 		base64.StdEncoding.EncodeToString([]byte(e.Namespace)),
 		base64.StdEncoding.EncodeToString([]byte(e.Release)),
 	)
-	resp, err := http.Post(url, "text", bytes.NewReader(buffer.Bytes()))
+
+	ctx, cancel := context.WithCancel(context.TODO())
+	time.AfterFunc(2*time.Second, cancel)
+	req, err := http.NewRequest("POST", url, bytes.NewReader(buffer.Bytes()))
+	if err != nil {
+		log.Printf("unable to create request for pushgateway: %s", err)
+	}
+	req.WithContext(ctx)
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Printf("unable to push result to pushgateway host %q: %s", e.PushGatewayURL, err)
 	} else if resp.StatusCode >= 400 {
