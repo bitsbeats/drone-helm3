@@ -14,6 +14,8 @@ type (
 		Certificate string
 		SkipTLS     bool
 		Namespace   string
+		EKSCluster  string
+		EKSRoleARN  string
 	}
 
 	Option func(*kubeConfig)
@@ -39,7 +41,21 @@ clusters:
 users:
 - name: helm
   user:
+{{- if .Token }}
     token: {{ .Token }}
+{{- else if .EKSCluster }}
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      command: aws-iam-authenticator
+      args:
+        - "token"
+        - "-i"
+        - "{{ .EKSCluster }}"
+    {{- if .EKSRoleARN }}
+        - "-r"
+        - "{{ .EKSRoleARN }}"
+    {{- end }}
+{{- end }}
 
 contexts:
   - name: helm
@@ -64,6 +80,18 @@ func WithApiServer(apiServer string) Option {
 func WithToken(token string) Option {
 	return func(k *kubeConfig) {
 		k.Token = token
+	}
+}
+
+func WithEKSCluster(eksCluster string) Option {
+	return func(k *kubeConfig) {
+		k.EKSCluster = eksCluster
+	}
+}
+
+func WithEKSRoleARN(eksRoleARN string) Option {
+	return func(k *kubeConfig) {
+		k.EKSRoleARN = eksRoleARN
 	}
 }
 
@@ -96,8 +124,11 @@ func CreateKubeConfig(options ...Option) error {
 	if k.ApiServer == "" {
 		return fmt.Errorf("no kubernetes api server provided")
 	}
-	if k.Token == "" {
+	if k.Token == ""  && k.EKSCluster == "" {
 		return fmt.Errorf("no kubernetes token provided")
+	}
+	if k.Token != "" && k.EKSCluster != "" {
+		return fmt.Errorf("token cannot be used simultaneously with eksCluster")
 	}
 	if k.Namespace == "" {
 		return fmt.Errorf("no namespace provided")

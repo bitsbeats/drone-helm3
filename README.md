@@ -39,6 +39,60 @@ Example:
 An always up2date version of the availible config options can be viewed on the
 source on the `Config` `struct` [here][1].
 
+## Deploying to EKS
+
+Example:
+
+```yaml
+- name: deploy app
+  image: bitsbeats/drone-helm3
+  environment:
+    AWS_DEFAULT_REGION: us-east-1  
+  settings:
+    kube_api_server: kube.example.com
+    eks_cluster: my-eks-cluster
+
+    chart: ./path-to/chart
+    release: release-name
+    namespace: namespace-name
+    timeout: 20m
+    helm_repos:
+      - bitnami=https://charts.bitnami.com/bitnami
+    envsubst: true
+    values:
+      - app.environment=awesome
+      - app.tag=${DRONE_TAG/v/}
+      - app.commit=${DRONE_COMMIT_SHA}
+```
+
+Role Based EKS Access Example:
+
+```yaml
+- name: deploy app
+  image: bitsbeats/drone-helm3
+  environment:
+    AWS_DEFAULT_REGION: us-east-1  
+  settings:
+    kube_api_server: kube.example.com
+    eks_cluster: my-eks-cluster
+    eks_role_arn: arn:aws:iam::[ACCOUNT ID HERE]:role/[ROLE HERE]
+
+    chart: ./path-to/chart
+    release: release-name
+    namespace: namespace-name
+    timeout: 20m
+    helm_repos:
+      - bitnami=https://charts.bitnami.com/bitnami
+    envsubst: true
+    values:
+      - app.environment=awesome
+      - app.tag=${DRONE_TAG/v/}
+      - app.commit=${DRONE_COMMIT_SHA}
+```
+
+**Note**:
+Depending on your setup you might also need to pass `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` to the environment.
+
 ## Monitoring
 
 Its possible to monitor your builds and rollbacks using prometheus and

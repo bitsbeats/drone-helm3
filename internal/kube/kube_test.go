@@ -86,6 +86,49 @@ contexts:
 			options: []Option{
 				WithConfig(kubeconfig),
 				WithApiServer("https://example.com"),
+				WithCertificate("CERTDATA"),
+				WithEKSCluster("eks_cluster"),
+				WithEKSRoleARN("my-eks-role-arn"),
+				WithNamespace("myapp"),
+			},
+			want: `
+apiVersion: v1
+kind: Config
+
+current-context: "helm"
+preferences: {}
+
+clusters:
+  - name: helm
+    cluster:
+      server: https://example.com
+      certificate-authority-data: CERTDATA
+
+users:
+- name: helm
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      command: aws-iam-authenticator
+      args:
+        - "token"
+        - "-i"
+        - "eks_cluster"
+        - "-r"
+        - "my-eks-role-arn"
+
+contexts:
+  - name: helm
+    context:
+      cluster: helm
+      namespace: myapp
+      user: helm
+`,
+		},		
+		{
+			options: []Option{
+				WithConfig(kubeconfig),
+				WithApiServer("https://example.com"),
 				WithSkipTLS(true),
 				WithToken("token"),
 				WithNamespace("myapp"),
@@ -137,10 +180,20 @@ contexts:
 			options: []Option{
 				WithConfig(kubeconfig),
 				WithApiServer("https://example.com"),
+				WithToken("token"),
+				WithEKSCluster("eks_cluster"),
+				WithNamespace("myapp"),
+			},
+			err: fmt.Errorf("token cannot be used simultaneously with eksCluster"),
+		},
+		{
+			options: []Option{
+				WithConfig(kubeconfig),
+				WithApiServer("https://example.com"),
 				WithNamespace("myapp"),
 			},
 			err: fmt.Errorf("no kubernetes token provided"),
-		},
+		},		
 		{
 			options: []Option{
 				WithConfig(kubeconfig),
