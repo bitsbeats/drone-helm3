@@ -164,7 +164,6 @@ func main() {
 		helm.WithNamespace(cfg.Namespace),
 
 		helm.WithTimeout(cfg.Timeout),
-		helm.WithLint(cfg.Lint),
 		helm.WithAtomic(cfg.Atomic),
 		helm.WithWait(cfg.Wait),
 		helm.WithForce(cfg.Force),
@@ -175,6 +174,7 @@ func main() {
 		helm.WithHelmRepos(cfg.HelmRepos),
 		helm.WithBuildDependencies(cfg.BuildDependencies, cfg.Chart),
 		helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
+		helm.WithLint(cfg.Lint),
 		helm.WithTest(cfg.Test, cfg.Release),
 		helm.WithTestRollback(cfg.Test, cfg.Release),
 
