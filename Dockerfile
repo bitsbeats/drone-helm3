@@ -1,4 +1,4 @@
-FROM golang:1.14 as builder
+FROM golang:1.17 as builder
 
 WORKDIR /tmp/build
 COPY . .
@@ -8,10 +8,10 @@ RUN GOOS=linux go build -mod=vendor -ldflags="-s -w"
 
 FROM alpine as downloader
 
-ARG HELM_VERSION=3.5.0
+ARG HELM_VERSION=3.8.1
 ENV HELM_URL=https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz
 
-ARG KUBECTL_VERSION=1.19.7
+ARG KUBECTL_VERSION=1.22.3
 ENV KUBECTL_URL=https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/linux/amd64/kubectl
 
 WORKDIR /tmp
