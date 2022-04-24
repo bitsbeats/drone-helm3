@@ -24,9 +24,11 @@ type (
 		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`                // skip creation of kubeconfig
 		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"` // path to kubeconfig
 		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`          // kubernetes api server
-		KubeToken       string `envconfig:"KUBE_TOKEN" required:"true"`               // kubernetes token
+		KubeToken       string `envconfig:"KUBE_TOKEN"`                               // kubernetes token
 		KubeCertificate string `envconfig:"KUBE_CERTIFICATE"`                         // kubernetes http ca
 		KubeSkipTLS     bool   `envconfig:"KUBE_SKIP_TLS" default:"false"`            // disable kubernetes tls verify
+		EKSCluster      string `envconfig:"EKS_CLUSTER"`                              // AWS EKS Cluster ID to put in kubeconfig
+		EKSRoleARN      string `envconfig:"EKS_ROLE_ARN"`                             // AWS IAM role resource name to put in kubeconfig
 
 		PushGatewayURL string `envconfig:"PUSHGATEWAY_URL" default:""` // url to a prometheus pushgateway server
 
@@ -110,6 +112,8 @@ func main() {
 			kube.WithConfig(cfg.KubeConfig),
 			kube.WithApiServer(cfg.KubeApiServer),
 			kube.WithToken(cfg.KubeToken),
+			kube.WithEKSCluster(cfg.EKSCluster),
+			kube.WithEKSRoleARN(cfg.EKSRoleARN),
 			kube.WithNamespace(cfg.Namespace),
 			kube.WithCertificate(cfg.KubeCertificate),
 			kube.WithSkipTLS(cfg.KubeSkipTLS),
