@@ -129,6 +129,15 @@ func WithDebug(dry bool) HelmOption {
 	}
 }
 
+func WithDisableOpenAPIValidation(disable bool) HelmOption {
+	return func(c *HelmCmd) error {
+		if disable {
+			c.Args = append(c.Args, "--disable-openapi-validation")
+		}
+		return nil
+	}
+}
+
 func WithTimeout(timeout time.Duration) HelmOption {
 	return func(c *HelmCmd) error {
 		c.Args = append(c.Args, "--timeout", timeout.String())

@@ -35,13 +35,14 @@ type (
 		Release   string `envconfig:"RELEASE" required:"true"`       // helm release name
 		Namespace string `envconfig:"NAMESPACE" required:"true"`     // kubernets and helm namespace
 
-		Lint      bool `envconfig:"LINT" default:"true"`             // helm lint option
-		Atomic    bool `envconfig:"ATOMIC" default:"true"`           // helm atomic option
-		Wait      bool `envconfig:"WAIT" default:"true"`             // helm wait option
-		Force     bool `envconfig:"FORCE" default:"false"`           // helm force option
-		Cleanup   bool `envconfig:"CLEANUP_ON_FAIL" default:"false"` // helm cleanup option
-		DryRun    bool `envconfig:"DRY_RUN" default:"false"`         // helm dryrun option
-		HelmDebug bool `envconfig:"HELM_DEBUG" default:"true"`       // helm debug option
+		Lint                     bool `envconfig:"LINT" default:"true"`                        // helm lint option
+		Atomic                   bool `envconfig:"ATOMIC" default:"true"`                      // helm atomic option
+		Wait                     bool `envconfig:"WAIT" default:"true"`                        // helm wait option
+		Force                    bool `envconfig:"FORCE" default:"false"`                      // helm force option
+		Cleanup                  bool `envconfig:"CLEANUP_ON_FAIL" default:"false"`            // helm cleanup option
+		DryRun                   bool `envconfig:"DRY_RUN" default:"false"`                    // helm dryrun option
+		HelmDebug                bool `envconfig:"HELM_DEBUG" default:"true"`                  // helm debug option
+		DisableOpenAPIValidation bool `envconfig:"DISABLE_OPENAPI_VALIDATION" default:"false"` // helm openapivalidation option
 
 		HelmRepos          []string `envconfig:"HELM_REPOS"`                          // additonal helm repos
 		BuildDependencies  bool     `envconfig:"BUILD_DEPENDENCIES" default:"true"`   // helm dependency build option
@@ -170,6 +171,7 @@ func main() {
 		helm.WithCleanupOnFail(cfg.Cleanup),
 		helm.WithDryRun(cfg.DryRun),
 		helm.WithDebug(cfg.HelmDebug),
+		helm.WithDisableOpenAPIValidation(cfg.DisableOpenAPIValidation),
 
 		helm.WithHelmRepos(cfg.HelmRepos),
 		helm.WithBuildDependencies(cfg.BuildDependencies, cfg.Chart),
