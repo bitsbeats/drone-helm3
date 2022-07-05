@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.25
+
+- add support to disable OpenAPI validation (helm option)
+
 ## v0.1.21
 
 - update helm to v3.5.0
