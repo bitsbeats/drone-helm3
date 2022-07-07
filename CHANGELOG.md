@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.26
+
+- update helm to v3.9.0
+- update kubectl to v1.22.11
+
 ## v0.1.25
 
 - add support to disable OpenAPI validation (helm option)
