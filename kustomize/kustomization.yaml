@@ -1,0 +1,7 @@
+---
+
+resources:
+  - all.yaml
+
+# plugin configuration gets injected here:
+

@@ -28,9 +28,12 @@ FROM busybox:glibc
 
 COPY --from=downloader /usr/local/bin/helm /usr/local/bin/helm
 COPY --from=downloader /usr/local/bin/kubectl /usr/local/bin/kubectl
+COPY --from=k8s.gcr.io/kustomize/kustomize:v3.8.7 /app/kustomize /usr/local/bin/kustomize
 
 COPY --from=builder /etc/ssl/certs /etc/ssl/certs
 COPY --from=builder /tmp/build/drone-helm3 /usr/local/bin/drone-helm3
+
+ADD ./kustomize /kustomize
 
 RUN mkdir /root/.kube
 

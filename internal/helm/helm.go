@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -133,6 +134,23 @@ func WithDisableOpenAPIValidation(disable bool) HelmOption {
 	return func(c *HelmCmd) error {
 		if disable {
 			c.Args = append(c.Args, "--disable-openapi-validation")
+		}
+		return nil
+	}
+}
+
+func WithPostKustomization(kustomization string) HelmOption {
+	return func(c *HelmCmd) error {
+		if kustomization != "" {
+			f, err := os.OpenFile("/kustomize/kustomization.yaml", os.O_APPEND|os.O_WRONLY, 0600)
+			if err != nil {
+				return fmt.Errorf("unable to create kustomization file: %w", err)
+			}
+			_, err = f.WriteString(kustomization)
+			if err != nil {
+				return fmt.Errorf("unable to write to kustomization file: %w", err)
+			}
+			c.Args = append(c.Args, "--post-renderer", "/kustomize/kustomize.sh")
 		}
 		return nil
 	}

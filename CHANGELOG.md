@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.27
+
+- add `post_kustomize` support
+- add kustomize binary v3.8.7
+
 ## v0.1.26
 
 - update helm to v3.9.0
