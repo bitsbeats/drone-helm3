@@ -72,6 +72,29 @@ will be marked as failed. See the [Helm documentation][2].
 In addition you can set the `test_rollback` setting to run `helm rollback` if
 the tests fail.
 
+## `post_kustomization`
+
+The `post_kustomization` allows to modify helm charts with customize.
+See [here][3] for the official documentation. The `resources` field is
+set via the plugin.
+
+Example:
+
+```yaml
+post_kustomization: |
+  patches:
+    - patch: |
+        - op: remove
+          path: /spec/template/spec/securityContext
+        - op: remove
+          path: /spec/template/spec/containers/0/securityContext
+      target:
+        kind: StatefulSet
+        labelSelector:
+          app.kubernetes.io/name=opensearch
+```
+
 
 [1]: https://github.com/bitsbeats/drone-helm3/blob/master/main.go#L22
 [2]: https://helm.sh/docs/topics/chart_tests/
+[3]: https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/
