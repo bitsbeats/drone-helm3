@@ -15,7 +15,7 @@ Example:
 
 ```yaml
 - name: deploy app
-  image: bitsbeats/drone-helm3
+  image: ghcr.io/bitsbeats/drone-helm3:latest
   settings:
     kube_api_server: kube.example.com
     kube_token: { from_secret: kube_token }
