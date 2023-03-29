@@ -6,8 +6,8 @@
 
 Drone plugin for Helm3.
 
-Helm Version: 3.9.0  
-Kubectl Version: 1.22.11
+Helm Version: 3.11.1  
+Kubectl Version: 1.25.8
 
 ## Drone settings
 

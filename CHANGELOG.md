@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.1.28
+
+- update helm to v3.11.1
+- update kubectl to 1.25.8
+
 ## v0.1.27
 
 - add `post_kustomize` support
