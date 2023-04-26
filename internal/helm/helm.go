@@ -262,6 +262,20 @@ func WithValuesYaml(file string) HelmOption {
 	}
 }
 
+func WithValuesYamlAddDefault(add bool, chartpath string) HelmOption {
+	return func (c *HelmCmd) error {
+		if add {
+			file := fmt.Sprintf("%s/values.yaml", chartpath)
+			_, err := os.Stat(file)
+			if os.IsNotExist(err) {
+				return fmt.Errorf("unable to find Default values file: %s", err)
+			}
+			c.Args = append(c.Args, "--values", file)
+		}
+		return nil
+	}
+}
+
 func WithPreCommand(command ...string) HelmOption {
 	return func(c *HelmCmd) error {
 		c.PreCmds = append(c.PreCmds, command)

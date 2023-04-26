@@ -51,10 +51,11 @@ type (
 		Test               bool     `envconfig:"TEST" default:"false"`                // helm run tests
 		TestRollback       bool     `envconfig:"TEST_ROLLBACK" default:"false"`       // helm run tests and rollback on failure
 
-		Envsubst     bool     `envconfig:"ENVSUBST" default:"false"` // allow envsubst on Values und ValuesString
-		Values       []string `envconfig:"VALUES"`                   // additional --set options
-		ValuesString []string `envconfig:"VALUES_STRING"`            // additional --set-string options
-		ValuesYaml   string   `envconfig:"VALUES_YAML"`              // additonal values files
+		Envsubst             bool     `envconfig:"ENVSUBST" default:"false"`               // allow envsubst on Values und ValuesString
+		Values               []string `envconfig:"VALUES"`                                 // additional --set options
+		ValuesString         []string `envconfig:"VALUES_STRING"`                          // additional --set-string options
+		ValuesYaml           string   `envconfig:"VALUES_YAML"`                            // additonal values files
+		ValuesYamlAddDefault bool     `envconfig:"VALUES_YAML_ADD_DEFAULT" default:"false"` // re add the default values.yaml as first option
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
 		Debug   bool          `envconfig:"DEBUG" default:"false"` // debug configuration
@@ -182,9 +183,10 @@ func main() {
 		helm.WithTest(cfg.Test, cfg.Release),
 		helm.WithTestRollback(cfg.Test, cfg.Release),
 
+		helm.WithValuesYamlAddDefault(cfg.ValuesYamlAddDefault, cfg.Chart),
+		helm.WithValuesYaml(cfg.ValuesYaml),
 		helm.WithValues(cfg.Values),
 		helm.WithValuesString(cfg.ValuesString),
-		helm.WithValuesYaml(cfg.ValuesYaml),
 
 		helm.WithKubeConfig(cfg.KubeConfig),
 		helm.WithRunner(NewRunner()),

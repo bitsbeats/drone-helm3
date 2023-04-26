@@ -141,6 +141,50 @@ func TestHelmCmd(t *testing.T) {
 			},
 		},
 		{
+			name: "helm upgrade with force, wait, disabled default values.yaml, values.yaml and set",
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-staging"),
+				WithRelease("myapp-staging"),
+				WithChart("./helm/myapp"),
+				WithWait(true),
+				WithForce(true),
+				WithValuesYamlAddDefault(false, "./helm/myapp"),
+				WithValuesYaml("./helm/values.yaml"),
+				WithValues([]string{
+					"git.commit_sha=21ffea3",
+				}),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(),
+					"helm", "upgrade", "--install", "-n", "myapp-staging",
+					"--wait", "--force", "--values", "./helm/values.yaml",
+					"--set", "git.commit_sha=21ffea3",
+					"myapp-staging", "./helm/myapp",
+				)
+			},
+		},
+		{
+			name: "helm upgrade with force, wait, enabled default values.yaml, values.yaml and set with missing file",
+			mode: WithInstallUpgradeMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-staging"),
+				WithRelease("myapp-staging"),
+				WithChart("./helm/myapp"),
+				WithWait(true),
+				WithForce(true),
+				WithValuesYamlAddDefault(true, "./helm/myapp"),
+				WithValuesYaml("./helm/values.yaml"),
+				WithValues([]string{
+					"git.commit_sha=21ffea3",
+				}),
+				WithRunner(mockRunner),
+			},
+			createErr: fmt.Errorf("unable to parse option: unable to find Default values file: stat ./helm/myapp/values.yaml: no such file or directory"),
+		},
+		{
 			name: "helm upgrade with force, wait, vaules and values yaml",
 			mode: WithInstallUpgradeMode(),
 			options: []HelmOption{
