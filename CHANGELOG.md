@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.1.30
+
+- add support for `pre_commands` setting to allow special login commands
+
+## v0.1.29
+
+- add support explicitly adding the `values.yaml` of the chart as paramenter  
+  this is required if you want to ensure that the `values.yaml` will be always respeted
+
 ## v0.1.28
 
 - update helm to v3.11.1
