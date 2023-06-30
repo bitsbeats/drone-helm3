@@ -21,6 +21,7 @@ import (
 
 type (
 	Config struct {
+		PreCommands     string `envconfig:"PRE_COMMANDS" default:""`                  // can be used to run custom code, for example gcloud auth
 		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`                // skip creation of kubeconfig
 		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"` // path to kubeconfig
 		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`          // kubernetes api server
@@ -51,10 +52,10 @@ type (
 		Test               bool     `envconfig:"TEST" default:"false"`                // helm run tests
 		TestRollback       bool     `envconfig:"TEST_ROLLBACK" default:"false"`       // helm run tests and rollback on failure
 
-		Envsubst             bool     `envconfig:"ENVSUBST" default:"false"`               // allow envsubst on Values und ValuesString
-		Values               []string `envconfig:"VALUES"`                                 // additional --set options
-		ValuesString         []string `envconfig:"VALUES_STRING"`                          // additional --set-string options
-		ValuesYaml           string   `envconfig:"VALUES_YAML"`                            // additonal values files
+		Envsubst             bool     `envconfig:"ENVSUBST" default:"false"`                // allow envsubst on Values und ValuesString
+		Values               []string `envconfig:"VALUES"`                                  // additional --set options
+		ValuesString         []string `envconfig:"VALUES_STRING"`                           // additional --set-string options
+		ValuesYaml           string   `envconfig:"VALUES_YAML"`                             // additonal values files
 		ValuesYamlAddDefault bool     `envconfig:"VALUES_YAML_ADD_DEFAULT" default:"false"` // re add the default values.yaml as first option
 
 		Timeout time.Duration `envconfig:"TIMEOUT" default:"15m"` // timeout for helm command
@@ -105,6 +106,28 @@ func main() {
 			debugCfg.Values[i] = fmt.Sprintf("%s=***", kv[0])
 		}
 		log.Printf("configuration: %+v", debugCfg)
+	}
+
+
+	// run pre commands if set
+	if cfg.PreCommands != "" {
+		scriptName := "/tmp/pre_commands.sh"
+		f, err := os.Create(scriptName)
+		if err != nil {
+			log.Fatalf("unable to create precommands file: %s", err)
+		}
+		_, err = f.WriteString(cfg.PreCommands)
+		if err != nil {
+			log.Fatalf("unable to write precommands to file: %s", err)
+		}
+
+		cmd := exec.Command("/bin/bash", scriptName)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+		if err != nil {
+			log.Fatalf("unable to run pre commands: %s", err)
+		}
 	}
 
 	// create kube config
