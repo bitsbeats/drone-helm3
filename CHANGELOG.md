@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.31
+
+- kube_* options are now all optional to support other providers
+
 ## v0.1.30
 
 - add support for `pre_commands` setting to allow special login commands

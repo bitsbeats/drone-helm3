@@ -24,8 +24,8 @@ type (
 		PreCommands     string `envconfig:"PRE_COMMANDS" default:""`                  // can be used to run custom code, for example gcloud auth
 		KubeSkip        bool   `envconfig:"KUBE_SKIP" default:"false"`                // skip creation of kubeconfig
 		KubeConfig      string `envconfig:"KUBE_CONFIG" default:"/root/.kube/config"` // path to kubeconfig
-		KubeApiServer   string `envconfig:"KUBE_API_SERVER" required:"true"`          // kubernetes api server
-		KubeToken       string `envconfig:"KUBE_TOKEN" required:"true"`               // kubernetes token
+		KubeApiServer   string `envconfig:"KUBE_API_SERVER"`                          // kubernetes api server
+		KubeToken       string `envconfig:"KUBE_TOKEN"`                               // kubernetes token
 		KubeCertificate string `envconfig:"KUBE_CERTIFICATE"`                         // kubernetes http ca
 		KubeSkipTLS     bool   `envconfig:"KUBE_SKIP_TLS" default:"false"`            // disable kubernetes tls verify
 
@@ -107,7 +107,6 @@ func main() {
 		}
 		log.Printf("configuration: %+v", debugCfg)
 	}
-
 
 	// run pre commands if set
 	if cfg.PreCommands != "" {
