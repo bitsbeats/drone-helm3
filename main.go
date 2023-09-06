@@ -219,7 +219,7 @@ func main() {
 
 	// run commands
 	log.Printf("running with a timeout of %s", cfg.Timeout.String())
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout+time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Timeout+(10*time.Minute))
 	defer cancel()
 	err = cmd.Run(ctx)
 	if err != nil {
