@@ -1,4 +1,5 @@
 #!/bin/sh
+set -euo pipefail
 
 umask 077
 cat > /kustomize/all.yaml
