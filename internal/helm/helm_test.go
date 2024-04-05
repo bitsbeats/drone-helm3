@@ -421,6 +421,20 @@ func TestHelmCmd(t *testing.T) {
 			},
 			runErr: fmt.Errorf("release and rollback failed: rollbackfail"),
 		},
+		{
+			name: "with helm uninstall",
+			mode: WithUninstallMode(),
+			options: []HelmOption{
+				WithNamespace("myapp-production"),
+				WithRelease("myapp-production"),
+				WithRunner(mockRunner),
+			},
+			setup: func() {
+				mockRunner.EXPECT().Run(
+					context.Background(), "helm", "uninstall", "-n", "myapp-production", "myapp-production",
+				)
+			},
+		},
 	}
 
 	for i, test := range tests {

@@ -13,6 +13,8 @@ import (
 
 type (
 	HelmCmd struct {
+		Mode HelmMode
+
 		Release string
 		Chart   string
 		Args    []string
@@ -31,16 +33,32 @@ type (
 		OnTestFailedRollbackFailed  []func()
 	}
 
-	HelmOption     func(*HelmCmd) error
+	HelmMode = string
+
+	// Build pattern options
 	HelmModeOption func(*HelmCmd)
+	HelmOption     func(*HelmCmd) error
 	Runner         interface {
 		Run(ctx context.Context, command string, args ...string) error
 	}
 )
 
+const (
+	InstallUpgradeMode HelmMode = "install-upgrade"
+	UninstallMode      HelmMode = "uninstall"
+)
+
 func WithInstallUpgradeMode() HelmModeOption {
 	return func(c *HelmCmd) {
+		c.Mode = InstallUpgradeMode
 		c.Args = append([]string{"upgrade", "--install"}, c.Args...)
+	}
+}
+
+func WithUninstallMode() HelmModeOption {
+	return func(c *HelmCmd) {
+		c.Mode = UninstallMode
+		c.Args = append([]string{"uninstall"}, c.Args...)
 	}
 }
 
@@ -263,7 +281,7 @@ func WithValuesYaml(file string) HelmOption {
 }
 
 func WithValuesYamlAddDefault(add bool, chartpath string) HelmOption {
-	return func (c *HelmCmd) error {
+	return func(c *HelmCmd) error {
 		if add {
 			file := fmt.Sprintf("%s/values.yaml", chartpath)
 			_, err := os.Stat(file)
@@ -323,13 +341,21 @@ func NewHelmCmd(mode HelmModeOption, options ...HelmOption) (*HelmCmd, error) {
 	if h.Release == "" {
 		return nil, fmt.Errorf("release name is required")
 	}
-	if h.Chart == "" {
+	if h.Chart == "" && h.Mode != UninstallMode {
 		return nil, fmt.Errorf("chart path is required")
 	}
 	if h.Runner == nil {
 		return nil, fmt.Errorf("runner is required")
 	}
-	h.Args = append(h.Args, h.Release, h.Chart)
+
+	switch h.Mode {
+	case InstallUpgradeMode:
+		h.Args = append(h.Args, h.Release, h.Chart)
+	case UninstallMode:
+		h.Args = append(h.Args, h.Release)
+	default:
+		return nil, fmt.Errorf("mode %q is not known", h.Mode)
+	}
 	return h, nil
 }
 

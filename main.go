@@ -163,58 +163,71 @@ func main() {
 	}
 
 	// configure helm operation mode
-	var modeOption helm.HelmModeOption
+	var cmd *helm.HelmCmd
 	switch cfg.Mode {
 	case "installupgrade":
-		modeOption = helm.WithInstallUpgradeMode()
+		// helm validations
+		// no need to download old versions if we update
+		if cfg.UpdateDependencies {
+			cfg.BuildDependencies = false
+		}
+		// test rollback requires test
+		if cfg.TestRollback {
+			cfg.Test = true
+		}
+
+		// create helm cmd
+		cmd, err = helm.NewHelmCmd(
+			helm.WithInstallUpgradeMode(),
+			helm.WithChart(cfg.Chart),
+			helm.WithRelease(cfg.Release),
+			helm.WithNamespace(cfg.Namespace),
+
+			helm.WithTimeout(cfg.Timeout),
+			helm.WithAtomic(cfg.Atomic),
+			helm.WithWait(cfg.Wait),
+			helm.WithForce(cfg.Force),
+			helm.WithCleanupOnFail(cfg.Cleanup),
+			helm.WithDryRun(cfg.DryRun),
+			helm.WithDebug(cfg.HelmDebug),
+			helm.WithDisableOpenAPIValidation(cfg.DisableOpenAPIValidation),
+			helm.WithPostKustomization(cfg.PostKustomization),
+
+			helm.WithHelmRepos(cfg.HelmRepos),
+			helm.WithBuildDependencies(cfg.BuildDependencies, cfg.Chart),
+			helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
+			helm.WithLint(cfg.Lint),
+			helm.WithTest(cfg.Test, cfg.Release),
+			helm.WithTestRollback(cfg.Test, cfg.Release),
+
+			helm.WithValuesYamlAddDefault(cfg.ValuesYamlAddDefault, cfg.Chart),
+			helm.WithValuesYaml(cfg.ValuesYaml),
+			helm.WithValues(cfg.Values),
+			helm.WithValuesString(cfg.ValuesString),
+
+			helm.WithKubeConfig(cfg.KubeConfig),
+			helm.WithRunner(NewRunner()),
+		)
+		if err != nil {
+			eh.Fatalf("unable to generate helm command: %s", err)
+		}
+	case "uninstall":
+		cmd, err = helm.NewHelmCmd(
+			helm.WithUninstallMode(),
+			helm.WithRelease(cfg.Release),
+			helm.WithNamespace(cfg.Namespace),
+
+			helm.WithWait(cfg.Wait),
+			helm.WithTimeout(cfg.Timeout),
+
+			helm.WithKubeConfig(cfg.KubeConfig),
+			helm.WithRunner(NewRunner()),
+		)
+		if err != nil {
+			eh.Fatalf("unable to generate helm command: %s", err)
+		}
 	default:
 		eh.Fatalf("mode %q is not known", cfg.Mode)
-	}
-
-	// helm validations
-	// no need to download old versions if we update
-	if cfg.UpdateDependencies {
-		cfg.BuildDependencies = false
-	}
-	// test rollback requires test
-	if cfg.TestRollback {
-		cfg.Test = true
-	}
-
-	// create helm cmd
-	cmd, err := helm.NewHelmCmd(
-		modeOption,
-		helm.WithChart(cfg.Chart),
-		helm.WithRelease(cfg.Release),
-		helm.WithNamespace(cfg.Namespace),
-
-		helm.WithTimeout(cfg.Timeout),
-		helm.WithAtomic(cfg.Atomic),
-		helm.WithWait(cfg.Wait),
-		helm.WithForce(cfg.Force),
-		helm.WithCleanupOnFail(cfg.Cleanup),
-		helm.WithDryRun(cfg.DryRun),
-		helm.WithDebug(cfg.HelmDebug),
-		helm.WithDisableOpenAPIValidation(cfg.DisableOpenAPIValidation),
-		helm.WithPostKustomization(cfg.PostKustomization),
-
-		helm.WithHelmRepos(cfg.HelmRepos),
-		helm.WithBuildDependencies(cfg.BuildDependencies, cfg.Chart),
-		helm.WithUpdateDependencies(cfg.UpdateDependencies, cfg.Chart),
-		helm.WithLint(cfg.Lint),
-		helm.WithTest(cfg.Test, cfg.Release),
-		helm.WithTestRollback(cfg.Test, cfg.Release),
-
-		helm.WithValuesYamlAddDefault(cfg.ValuesYamlAddDefault, cfg.Chart),
-		helm.WithValuesYaml(cfg.ValuesYaml),
-		helm.WithValues(cfg.Values),
-		helm.WithValuesString(cfg.ValuesString),
-
-		helm.WithKubeConfig(cfg.KubeConfig),
-		helm.WithRunner(NewRunner()),
-	)
-	if err != nil {
-		eh.Fatalf("unable to generate helm command: %s", err)
 	}
 
 	// run commands
