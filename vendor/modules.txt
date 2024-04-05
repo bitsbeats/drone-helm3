@@ -1,8 +1,8 @@
-# github.com/drone/envsubst v1.0.2
+# github.com/drone/envsubst v1.0.3
 github.com/drone/envsubst
 github.com/drone/envsubst/parse
 github.com/drone/envsubst/path
-# github.com/golang/mock v1.4.3
+# github.com/golang/mock v1.6.0
 github.com/golang/mock/gomock
 # github.com/google/go-cmp v0.3.1
 github.com/google/go-cmp/cmp
@@ -10,9 +10,9 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
+# github.com/jinzhu/copier v0.4.0
 github.com/jinzhu/copier
-# github.com/joho/godotenv v1.3.0
+# github.com/joho/godotenv v1.5.1
 github.com/joho/godotenv
 # github.com/kelseyhightower/envconfig v1.4.0
 github.com/kelseyhightower/envconfig
