@@ -32,7 +32,7 @@ type (
 		PushGatewayURL string `envconfig:"PUSHGATEWAY_URL" default:""` // url to a prometheus pushgateway server
 
 		Mode      string `envconfig:"MODE" default:"installupgrade"` // changes helm operation mode
-		Chart     string `envconfig:"CHART" required:"true"`         // the helm chart to be deployed
+		Chart     string `envconfig:"CHART"`                         // the helm chart to be deployed
 		Release   string `envconfig:"RELEASE" required:"true"`       // helm release name
 		Namespace string `envconfig:"NAMESPACE" required:"true"`     // kubernets and helm namespace
 
